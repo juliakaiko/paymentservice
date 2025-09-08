@@ -65,8 +65,7 @@ public class GlobalAdvice {
     }
 
     /**
-     * Handles data integrity violation exceptions, for example,
-     * when attempting to save a duplicate unique field (such as email).
+     * Handles data integrity violation exceptions
      *
      * @param e DataIntegrityViolationException containing integrity violation information
      * @return ResponseEntity with an ErrorItem object containing:

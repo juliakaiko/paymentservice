@@ -1,6 +1,5 @@
 package com.mymicroservices.paymentservice.mapper;
 
-import com.mymicroservices.paymentservice.dto.PaymentRequestDto;
 import com.mymicroservices.paymentservice.dto.PaymentResponseDto;
 import com.mymicroservices.paymentservice.model.PaymentEntity;
 import lombok.NonNull;
