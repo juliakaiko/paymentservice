@@ -23,11 +23,6 @@
                 collectionName="payments"
                 keys="{ status: 1 }"
                 options="{ name: 'idx_payments_status' }"/>
-
-        <ext:createIndex
-                collectionName="payments"
-                keys="{ timestamp: -1 }"
-                options="{ name: 'idx_payments_timestamp_desc' }"/>
     </changeSet>
 
 </databaseChangeLog>

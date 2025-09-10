@@ -16,7 +16,7 @@
                 "_class": "com.mymicroservices.paymentservice.model.PaymentEntity",
                 "order_id": "1",
                 "user_id": "1",
-                "status": "SUCCESS",
+                "status": "PAID",
                 "timestamp": { "$date": "2025-09-01T17:10:25Z" },
                 "payment_amount": 5000
                 }

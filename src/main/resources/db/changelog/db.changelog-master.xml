@@ -15,7 +15,6 @@
         <tagDatabase tag="db_init"/>
     </changeSet>
 
-    <!-- relativeToChangelogFile - файл ищется относительно db.changelog-master.xml -->
     <include file="v.1.0/db.changelog-v.1.0.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="1" author="julia_kaiko">
@@ -28,10 +27,10 @@
         <tagDatabase tag="v.2.0"/>
     </changeSet>
 
-    <include file="v.3.0/db.changelog-v.3.0.xml" relativeToChangelogFile="true"/>
+    <!--<include file="v.3.0/db.changelog-v.3.0.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="3" author="julia_kaiko">
         <tagDatabase tag="v.3.0"/>
-    </changeSet>
-
+    </changeSet>-->
+    <!-- relativeToChangelogFile - файл ищется относительно db.changelog-master.xml -->
 </databaseChangeLog>
