@@ -5,6 +5,7 @@ import com.mymicroservice.paymentservice.model.Status;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
+@Profile("!test")
 public class PaymentDataLoader implements CommandLineRunner {
 
     private final PaymentRepository paymentRepository;

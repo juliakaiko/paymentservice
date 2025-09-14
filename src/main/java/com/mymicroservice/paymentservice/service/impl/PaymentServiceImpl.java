@@ -1,5 +1,6 @@
 package com.mymicroservice.paymentservice.service.impl;
 
+import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.kafka.PaymentEventProducer;
 import com.mymicroservice.paymentservice.model.PaymentEntity;
 import com.mymicroservice.paymentservice.model.Status;
@@ -40,13 +41,15 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public PaymentEventDto getPaymentById(String id) {
-        PaymentEntity entity = paymentRepository.findById(id).get();
+        PaymentEntity entity = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
         log.info("getPaymentById(): {}", id);
         return PaymentResponseMapper.INSTANCE.toDto(entity);
     }
 
     public PaymentEventDto updatePayment(String id, OrderEventDto dtoDetails) {
-        PaymentEntity entity = paymentRepository.findById(id).get();
+        PaymentEntity entity = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
         entity.setOrderId(dtoDetails.getOrderId());
         entity.setUserId(dtoDetails.getUserId());
         entity.setPaymentAmount(dtoDetails.getPaymentAmount());
@@ -58,7 +61,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public PaymentEventDto deletePaymentById(String id) {
-        PaymentEntity entity = paymentRepository.findById(id).get();
+        PaymentEntity entity = paymentRepository.findById(id)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
         paymentRepository.deleteById(id);
         log.info("deletePaymentById(): {}", id);
         return PaymentResponseMapper.INSTANCE.toDto(entity);

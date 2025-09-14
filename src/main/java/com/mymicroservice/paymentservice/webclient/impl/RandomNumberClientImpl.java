@@ -1,7 +1,9 @@
 package com.mymicroservice.paymentservice.webclient.impl;
 
 import com.mymicroservice.paymentservice.webclient.RandomNumberClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.concurrent.ThreadLocalRandom;
@@ -12,8 +14,9 @@ public class RandomNumberClientImpl implements RandomNumberClient {
 
     private final WebClient webClient;
 
-    public RandomNumberClientImpl(WebClient.Builder builder) {
-        this.webClient = builder.baseUrl("http://www.randomnumberapi.com/api/v1.0/random?min=1&max=100&count=1").build();
+    public RandomNumberClientImpl(WebClient.Builder builder,
+                                  @Value("${random.number.api.base-url}") String baseUrl) {
+        this.webClient = builder.baseUrl(baseUrl).build(); // используем параметр, а не поле
     }
 
     public int generateRandNum() {

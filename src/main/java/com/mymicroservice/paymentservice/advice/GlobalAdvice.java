@@ -1,5 +1,6 @@
 package com.mymicroservice.paymentservice.advice;
 
+import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.util.ErrorItem;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -101,6 +102,12 @@ public class GlobalAdvice {
      */
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public ResponseEntity<ErrorItem> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        ErrorItem error = generateMessage(e, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({PaymentNotFoundException.class})
+    public ResponseEntity<ErrorItem> handlePaymentNotFoundException(PaymentNotFoundException e) {
         ErrorItem error = generateMessage(e, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
