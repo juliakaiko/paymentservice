@@ -16,7 +16,7 @@ public class PaymentEntitiesGenerator {
                 .orderId("1")
                 .status(Status.PAID)
                 .timestamp(LocalDateTime.of(2025, 1, 1, 1, 10, 1))
-                .paymentAmount(BigDecimal.valueOf(100000, 2))
+                .paymentAmount(BigDecimal.valueOf(1000.00))
                 .build();
 
         PaymentEntity paymentEntity2 = PaymentEntity.builder()
@@ -25,7 +25,7 @@ public class PaymentEntitiesGenerator {
                 .orderId("2")
                 .status(Status.FAILED)
                 .timestamp(LocalDateTime.of(2025, 2, 2, 2, 20, 2))
-                .paymentAmount(BigDecimal.valueOf(200000, 2))
+                .paymentAmount(BigDecimal.valueOf(2000.00))
                 .build();
 
         return  List.of(paymentEntity1,paymentEntity2);

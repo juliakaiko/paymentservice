@@ -10,7 +10,7 @@ public class PaymentRequestDtoGenerator {
         return PaymentRequestDto.builder()
                 .orderId("1")
                 .userId("1")
-                .paymentAmount(BigDecimal.valueOf(100000, 2))
+                .paymentAmount(BigDecimal.valueOf(1000.00))
                 .build();
     }
 }

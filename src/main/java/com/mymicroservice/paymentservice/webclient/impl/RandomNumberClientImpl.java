@@ -1,7 +1,6 @@
 package com.mymicroservice.paymentservice.webclient.impl;
 
 import com.mymicroservice.paymentservice.webclient.RandomNumberClient;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ public class RandomNumberClientImpl implements RandomNumberClient {
 
     public RandomNumberClientImpl(WebClient.Builder builder,
                                   @Value("${random.number.api.base-url}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build(); // используем параметр, а не поле
+        this.webClient = builder.baseUrl(baseUrl).build();
     }
 
     public int generateRandNum() {
@@ -29,7 +28,7 @@ public class RandomNumberClientImpl implements RandomNumberClient {
                             .build())
                     .retrieve() //send a request
                     .bodyToMono(Integer[].class)
-                    .block(); //a terminal operation that subscribes to Mono and waits for the result synchronously.
+                    .block(); //a terminal operation that subscribes to Mono and waits for the result synchronously
             return (arr != null && arr.length > 0) ? arr[0] : fallbackRandom();
         } catch (Exception ex) {
             log.warn("Random API failed, use fallbackRandom()", ex);

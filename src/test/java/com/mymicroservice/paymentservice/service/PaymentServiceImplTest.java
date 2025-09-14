@@ -60,7 +60,7 @@ public class PaymentServiceImplTest {
         paymentRequestDto = PaymentRequestDto.builder()
                 .orderId("1")
                 .userId("1")
-                .paymentAmount(BigDecimal.valueOf(100000, 2))
+                .paymentAmount(BigDecimal.valueOf(1000.00))
                 .build();
         orderEventDto = PaymentRequestMapper.INSTANCE.toOrderEventDto(paymentRequestDto);
     }
@@ -200,7 +200,7 @@ public class PaymentServiceImplTest {
                 LocalDateTime.of(2025, 1, 1, 1, 10, 1).minusDays(1),
                 LocalDateTime.of(2025, 2, 2, 2, 20, 2).plusDays(1));
 
-        assertEquals(BigDecimal.valueOf(300000, 2), sum);
+        assertEquals(BigDecimal.valueOf(3000.00), sum);
     }
 
 }

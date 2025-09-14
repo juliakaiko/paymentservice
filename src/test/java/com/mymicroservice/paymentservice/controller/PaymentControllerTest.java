@@ -83,6 +83,7 @@ public class PaymentControllerTest {
     @Test
     public void createPayment_ShouldReturnCreatedPaymentEventDto() throws Exception {
         log.info("▶ Running test: createPayment_ShouldReturnCreatedPaymentEventDto(), OrdertEvent={}", orderEventDto);
+
         when(paymentService.createPayment(any(OrderEventDto.class))).thenReturn(paymentEventDto);
 
         mockMvc.perform(post("/api/payments/")
@@ -97,6 +98,7 @@ public class PaymentControllerTest {
     @Test
     public void getPaymentById_ShouldReturnPaymentEventDto() throws Exception {
         log.info("▶ Running test: getPaymentById_ShouldReturnPaymentEventDto(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(paymentEventDto);
 
         mockMvc.perform(get("/api/payments/{id}", PAYMENT_ID))
@@ -109,6 +111,7 @@ public class PaymentControllerTest {
     @Test
     public void getPaymentById_ShouldReturnNotFound() throws Exception {
         log.info("▶ Running test: getPaymentById_ShouldReturnNotFound(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.getPaymentById(PAYMENT_ID)).thenReturn(null);
 
         mockMvc.perform(get("/api/payments/{id}", PAYMENT_ID))
@@ -119,6 +122,8 @@ public class PaymentControllerTest {
 
     @Test
     public void updatePayment_ShouldReturnUpdatedPaymentEventDto() throws Exception {
+        log.info("▶ Running test: updatePayment_ShouldReturnUpdatedPaymentEventDto(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.updatePayment(eq(PAYMENT_ID), any(OrderEventDto.class))).thenReturn(paymentEventDto);
 
         mockMvc.perform(put("/api/payments/{id}", PAYMENT_ID)
@@ -132,6 +137,8 @@ public class PaymentControllerTest {
 
     @Test
     public void updatePayment_ShouldReturnNotFound() throws Exception {
+        log.info("▶ Running test: updatePayment_ShouldReturnNotFound(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.updatePayment(eq(PAYMENT_ID), any(OrderEventDto.class))).thenReturn(null);
 
         mockMvc.perform(put("/api/payments/{id}", PAYMENT_ID)
@@ -144,6 +151,8 @@ public class PaymentControllerTest {
 
     @Test
     public void deletePayment_ShouldReturnDeletedPaymentEventDto() throws Exception {
+        log.info("▶ Running test: deletePayment_ShouldReturnDeletedPaymentEventDto(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.deletePaymentById(PAYMENT_ID)).thenReturn(paymentEventDto);
 
         mockMvc.perform(delete("/api/payments/{id}", PAYMENT_ID))
@@ -155,6 +164,8 @@ public class PaymentControllerTest {
 
     @Test
     public void deletePayment_ShouldReturnNotFound() throws Exception {
+        log.info("▶ Running test: deletePayment_ShouldReturnNotFound(), PAYMENT_ID={}", PAYMENT_ID);
+
         when(paymentService.deletePaymentById(PAYMENT_ID)).thenReturn(null);
 
         mockMvc.perform(delete("/api/payments/{id}", PAYMENT_ID))
@@ -165,6 +176,8 @@ public class PaymentControllerTest {
 
     @Test
     public void getPaymentsByOrder_ShouldReturnList() throws Exception {
+        log.info("▶ Running test: getPaymentsByOrder_ShouldReturnList(), ORDER_ID={}", paymentEventDto.getOrderId());
+
         when(paymentService.getPaymentsByOrderId("1")).thenReturn(List.of(paymentEventDto));
 
         mockMvc.perform(get("/api/payments/order/{orderId}", "1"))
@@ -176,6 +189,8 @@ public class PaymentControllerTest {
 
     @Test
     public void getPaymentsByUser_ShouldReturnList() throws Exception {
+        log.info("▶ Running test: getPaymentsByUser_ShouldReturnList(), USER_ID={}", paymentEventDto.getUserId());
+
         when(paymentService.getPaymentsByUserId("1")).thenReturn(List.of(paymentEventDto));
 
         mockMvc.perform(get("/api/payments/user/{userId}", "1"))
@@ -188,6 +203,8 @@ public class PaymentControllerTest {
     @Test
     public void getPaymentsByStatuses_ShouldReturnList() throws Exception {
         List<String> statuses = Arrays.asList("PAID", "PENDING");
+        log.info("▶ Running test: getPaymentsByStatuses_ShouldReturnList(), statuses={}", statuses);
+
         when(paymentService.getPaymentsByStatuses(statuses)).thenReturn(List.of(paymentEventDto));
 
         mockMvc.perform(get("/api/payments/statuses")
@@ -202,6 +219,8 @@ public class PaymentControllerTest {
     public void getTotalSumForPeriod_ShouldReturnSum() throws Exception {
         LocalDateTime start = LocalDateTime.of(2025, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2025, 12, 31, 23, 59);
+        log.info("▶ Running test: getTotalSumForPeriod_ShouldReturnSum(), start={}, end={}", start, end);
+
         BigDecimal expectedSum = BigDecimal.valueOf(12345);
 
         when(paymentService.getTotalSumForPeriod(start, end)).thenReturn(expectedSum);

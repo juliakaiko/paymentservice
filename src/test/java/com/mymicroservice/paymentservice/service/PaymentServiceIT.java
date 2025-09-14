@@ -8,7 +8,6 @@ import com.mymicroservice.paymentservice.model.PaymentEntity;
 import com.mymicroservice.paymentservice.model.Status;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import com.mymicroservice.paymentservice.service.impl.PaymentServiceImpl;
-import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -168,9 +167,7 @@ public class PaymentServiceIT {
         assertThat(firstRecord.value().getOrderId()).isEqualTo("1");
         assertThat(firstRecord.value().getPaymentAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000.00));
 
-        if (consumer != null) {
-            consumer.close();
-        }
+        consumer.close();
     }
 
     @Test
@@ -251,9 +248,11 @@ public class PaymentServiceIT {
         OrderEventDto order2 = PaymentRequestMapper.INSTANCE.toOrderEventDto(req2);
         PaymentEventDto dto2 = paymentService.createPayment(order2);
 
-        BigDecimal sum = paymentService.getTotalSumForPeriod(
-                LocalDateTime.now().minusDays(1),
-                LocalDateTime.now().plusDays(1));
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
+        log.info("getTotalSumForPeriod_returnsSum(): {} - {}", start, end);
+
+        BigDecimal sum = paymentService.getTotalSumForPeriod(start, end);
 
         assertEquals(BigDecimal.valueOf(2000.00), sum);
     }

@@ -74,7 +74,6 @@ public class PaymentController {
                 : ResponseEntity.ok(updatedPayment);
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePayment (@PathVariable("id") String id){
         log.info("Request to delete the Payment by id: {}", id);

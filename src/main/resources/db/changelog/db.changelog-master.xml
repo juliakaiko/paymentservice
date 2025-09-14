@@ -32,5 +32,5 @@
     <changeSet id="3" author="julia_kaiko">
         <tagDatabase tag="v.3.0"/>
     </changeSet>-->
-    <!-- relativeToChangelogFile - файл ищется относительно db.changelog-master.xml -->
+
 </databaseChangeLog>
