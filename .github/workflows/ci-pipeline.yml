@@ -2,7 +2,13 @@ name: CI Pipeline for Spring Boot JAR (PaymentService)
 
 on:
   push:
-    branches: [ branch1 ]
+    branches:
+      - branch1
+      - main
+
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
