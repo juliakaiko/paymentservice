@@ -103,5 +103,5 @@ jobs:
       - name: Build and Push Docker Image
         if: success()
         run: |
-          docker build -t juliakaiko94/paymentservice:latest -f Dockerfile.prod .
+          docker build -t juliakaiko94/paymentservice:latest
           docker push juliakaiko94/paymentservice:latest

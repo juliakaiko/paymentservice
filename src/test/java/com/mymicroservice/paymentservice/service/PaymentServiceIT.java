@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,12 +86,6 @@ public class PaymentServiceIT {
         registry.add("random.number.api.base-url", () -> "http://localhost:${wiremock.server.port}");
         registry.add("spring.data.mongodb.uri", mongoDB::getReplicaSetUrl);
     }
-
-   /* @BeforeAll
-    static void setupContainers() {
-        kafka.start();
-        mongoDB.start();
-    }*/
 
     @BeforeEach
     void init() {
