@@ -64,7 +64,7 @@ public class PaymentServiceIT {
     static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
 
     @Container
-    static MongoDBContainer mongoDB = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
+    static MongoDBContainer mongoDB = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
 
     @Autowired
     private PaymentRepository paymentRepository;

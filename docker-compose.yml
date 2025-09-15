@@ -1,5 +1,35 @@
 version: '3.8'
+
 services:
+  paymentservice:
+    build: .
+    container_name: paymentservice
+    ports:
+      - "8084:8084"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - kafka
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/paymentDB
+    command: ["java", "-jar", "app.jar"]
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: [ "CMD-SHELL", "mongo --eval 'db.adminCommand(\"ping\")' || exit 1" ]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+      start_period: 30s
+
   kafka:
     image: bitnami/kafka:3.7
     container_name: kafka
@@ -10,7 +40,17 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+      start_period: 20s
+
+volumes:
+  mongo_data:

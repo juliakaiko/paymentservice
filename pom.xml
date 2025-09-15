@@ -8,7 +8,7 @@
 		<version>3.5.5</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.mymicroservices</groupId>
+	<groupId>com.mymicroservice</groupId>
 	<artifactId>paymentservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>paymentservice</name>
@@ -119,19 +119,6 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- WireMock for mocking HTTP requests -->
-		<!--<dependency>
-			<groupId>org.wiremock</groupId>
-			<artifactId>wiremock-standalone</artifactId>
-			<version>3.12.1</version>
-			<scope>test</scope>
-		</dependency>-->
-		<!-- -->
-		<dependency>
-			<groupId>org.awaitility</groupId>
-			<artifactId>awaitility</artifactId>
-			<version>4.2.0</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-contract-wiremock</artifactId>
@@ -153,12 +140,6 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--		<dependency>
-                    <groupId>io.jsonwebtoken</groupId>
-                    <artifactId>jjwt-api</artifactId>
-                    <version>0.12.3</version>
-                    <scope>test</scope>
-                </dependency>-->
 	</dependencies>
 
 	<build>
@@ -173,6 +154,12 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<requiresUnpack>
+						<dependency>
+							<groupId>org.liquibase.ext</groupId>
+							<artifactId>liquibase-mongodb</artifactId>
+						</dependency>
+					</requiresUnpack>
 				</configuration>
 			</plugin>
 			<plugin>
