@@ -19,8 +19,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Slf4j
 @DataMongoTest
-@Import(MongoTestcontainersConfig.class)
-public class PaymentRepositoryTest {
+//@Import(MongoTestcontainersConfig.class)
+public class PaymentRepositoryTest extends MongoTestcontainersConfig {
 
     @Autowired
     private  PaymentRepository paymentRepository;

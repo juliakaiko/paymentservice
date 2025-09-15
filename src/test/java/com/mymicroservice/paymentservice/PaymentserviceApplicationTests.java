@@ -6,10 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-@Import(MongoTestcontainersConfig.class)
+//@Import(MongoTestcontainersConfig.class)
 @SpringBootTest
 @ActiveProfiles("test")
-class PaymentserviceApplicationTests {
+class PaymentserviceApplicationTests extends MongoTestcontainersConfig{
 
 	@Test
 	void contextLoads() {
