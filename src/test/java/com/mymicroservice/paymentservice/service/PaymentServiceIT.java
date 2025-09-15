@@ -88,11 +88,11 @@ public class PaymentServiceIT {
         registry.add("spring.data.mongodb.uri", mongoDB::getReplicaSetUrl);
     }
 
-    @BeforeAll
+   /* @BeforeAll
     static void setupContainers() {
         kafka.start();
         mongoDB.start();
-    }
+    }*/
 
     @BeforeEach
     void init() {
