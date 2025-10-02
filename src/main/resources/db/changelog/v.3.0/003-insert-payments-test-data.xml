@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="003-insert-payments-test-data" author="julia_kaiko" context="dev">
+        <ext:insertOne collectionName="payments">
+            <ext:document>
+                {
+                "_class": "com.mymicroservices.paymentservice.model.PaymentEntity",
+                "order_id": "1",
+                "user_id": "1",
+                "status": "PAID",
+                "timestamp": { "$date": "2025-09-01T17:10:25Z" },
+                "payment_amount": 5000
+                }
+            </ext:document>
+        </ext:insertOne>
+
+        <ext:insertOne collectionName="payments">
+            <ext:document>
+                {
+                "_class": "com.mymicroservices.paymentservice.model.PaymentEntity",
+                "order_id": "2",
+                "user_id": "2",
+                "status": "FAILED",
+                "timestamp": { "$date": "2025-09-05T11:30:01Z" },
+                "payment_amount": 1000
+                }
+            </ext:document>
+        </ext:insertOne>
+    </changeSet>
+
+</databaseChangeLog>
