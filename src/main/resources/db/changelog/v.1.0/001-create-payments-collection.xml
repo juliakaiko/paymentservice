@@ -10,6 +10,11 @@
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="01-create-payments-collection" author="julia_kaiko">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <ext:collectionExists collectionName="payments"/>
+            </not>
+        </preConditions>
         <ext:createCollection collectionName="payments"/>
     </changeSet>
 

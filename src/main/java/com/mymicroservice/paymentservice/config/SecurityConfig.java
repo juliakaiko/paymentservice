@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers(
+                                "/actuator/**",
                                 "/swagger-ui/**",
                                 "/swagger-resources/*",
                                 "/v3/api-docs/**").permitAll()
