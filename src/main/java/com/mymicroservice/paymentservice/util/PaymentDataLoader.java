@@ -35,10 +35,10 @@ public class PaymentDataLoader implements CommandLineRunner {
         List<PaymentEntity> payments = List.of(
                 PaymentEntity.builder()
                         .id("payment-1")
-                        .orderId("1")
+                        .orderId("7")
                         .userId("1")
                         .status(Status.PAID)
-                        .timestamp(LocalDateTime.of(2025, 9, 1, 17, 10, 25))
+                        .timestamp(LocalDateTime.of(2025, 5, 18, 17, 10, 25))
                         .paymentAmount(BigDecimal.valueOf(500000, 2))
                         .build(),
                 PaymentEntity.builder()
@@ -47,6 +47,14 @@ public class PaymentDataLoader implements CommandLineRunner {
                         .userId("2")
                         .status(Status.FAILED)
                         .timestamp(LocalDateTime.of(2025, 9, 5, 11, 30, 1))
+                        .paymentAmount(BigDecimal.valueOf(100000, 2))
+                        .build(),
+                PaymentEntity.builder()
+                        .id("payment-3")
+                        .orderId("11")
+                        .userId("1")
+                        .status(Status.FAILED)
+                        .timestamp(LocalDateTime.of(2025, 7, 22, 11, 30, 1))
                         .paymentAmount(BigDecimal.valueOf(100000, 2))
                         .build()
         );
