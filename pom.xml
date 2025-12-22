@@ -124,6 +124,12 @@
 			<artifactId>mongodb</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <!-- For JSON logs -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.4</version>
+        </dependency>
 		<!-- WireMock for mocking HTTP requests -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
