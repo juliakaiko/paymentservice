@@ -30,18 +30,4 @@ public class KafkaMdcUtil {
         return builder.build();
     }
 
-    /**
-     * recovers MDC from Kafka headers
-     */
-    public static void restoreMdcFromMessage(Message<?> message) {
-        Object requestId = message.getHeaders().get("X-Request-Id");
-        if (requestId != null) {
-            MDC.put("requestId", requestId.toString());
-        }
-
-        Object sourceService = message.getHeaders().get("X-Source-Service");
-        if (sourceService != null) {
-            MDC.put("sourceService", sourceService.toString());
-        }
-    }
 }

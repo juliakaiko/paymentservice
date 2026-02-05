@@ -29,6 +29,13 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/actuator")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             if (isGatewayCall(request)) {
                 log.info("Request received from Gateway, processing JWT authentication");

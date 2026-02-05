@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -15,10 +16,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class RequestIdFilter extends OncePerRequestFilter {
 
     private static final String REQUEST_ID = "requestId";
-    private static final Logger TRACE_MDC_LOGGER = LoggerFactory.getLogger("TRACE_MDC_LOGGER");
+    private static final String SERVICE_NAME = "paymentservicee";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -29,20 +31,20 @@ public class RequestIdFilter extends OncePerRequestFilter {
                 .orElse(UUID.randomUUID().toString());
 
         MDC.put(REQUEST_ID, requestId);
-        MDC.put("serviceName", "paymentservice");
+        MDC.put("serviceName", SERVICE_NAME);
 
         response.setHeader("X-Request-Id", requestId);
 
-        // Логируем ВХОДЯЩИЙ запрос (один раз!)
-        TRACE_MDC_LOGGER.info("{} {}",
+        // Пишем в файл трассировки лог в начале запроса
+        log.info("{} {}",
                 request.getMethod(),
                 request.getRequestURI());
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // Логируем ИСХОДЯЩИЙ ответ
-            TRACE_MDC_LOGGER.info("Response status: {}", response.getStatus());
+            // Пишем в файл трассировки лог при RESPONSE
+            log.info("Response status: {}", response.getStatus());
 
             MDC.clear();
         }
