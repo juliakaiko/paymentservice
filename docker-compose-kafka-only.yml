@@ -4,7 +4,7 @@ version: '3.8'
 services:
   kafka:
     image: apache/kafka:3.9.1
-    container_name: kafka
+    container_name: kafka2
     ports:
       - "9092:9092"
     environment:

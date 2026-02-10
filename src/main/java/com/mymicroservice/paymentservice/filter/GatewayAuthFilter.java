@@ -23,11 +23,16 @@ import java.util.Map;
 public class GatewayAuthFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String INTERNAL_CALL_HEADER = "X-Internal-Call";
+    private static final String SOURCE_SERVICE_HEADER = "X-Source-Service";
+    private static final String GATEWAY_SERVICE_NAME = "gateway";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getRequestURI();
 
         try {
             if (isGatewayCall(request)) {
@@ -35,7 +40,7 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                 parseJwtAndAuthenticate(request);
             } else {
                 SecurityContextHolder.clearContext();
-                log.debug("Internal service-to-service call detected, no authentication required");
+                log.info("Internal service-to-service call detected, no authentication required");
             }
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
@@ -49,9 +54,12 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
      * Define calls from Gateway by the X-Internal-Call and X-Source-Service header
      */
     private boolean isGatewayCall(HttpServletRequest request) {
-        String internalCall = request.getHeader("X-Internal-Call");
-        String sourceService = request.getHeader("X-Source-Service");
-        boolean result = "true".equals(internalCall) && sourceService.equals("GATEWAY");
+        String internalCall = request.getHeader(INTERNAL_CALL_HEADER);
+        String sourceService = request.getHeader(SOURCE_SERVICE_HEADER);
+
+        boolean result = Boolean.parseBoolean(internalCall)
+                && GATEWAY_SERVICE_NAME.equalsIgnoreCase(sourceService);
+
         log.debug("isGatewayCall check: X-Internal-Call={}, result={}", internalCall, result);
         return result;
     }
@@ -73,7 +81,9 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // JWT Base64 parsing, without signature verification (Gateway does it)
+        /**
+         * JWT Base64 parsing, without signature verification (Gateway does it)
+         */
         String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
         Map<String, Object> claims = objectMapper.readValue(payloadJson, Map.class);
 

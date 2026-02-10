@@ -31,7 +31,7 @@ public class RandomNumberClientImpl implements RandomNumberClient {
                     .block(); //a terminal operation that subscribes to Mono and waits for the result synchronously
             return (arr != null && arr.length > 0) ? arr[0] : fallbackRandom();
         } catch (Exception ex) {
-            log.warn("Random API failed, use fallbackRandom()", ex);
+            log.warn("Random API failed, fallbackRandom() was used", ex);
             return fallbackRandom();
         }
     }
