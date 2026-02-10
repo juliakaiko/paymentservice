@@ -28,6 +28,10 @@
 		<sonar.java.binaries>target/classes</sonar.java.binaries>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <spring-webflux.version>6.1.13</spring-webflux.version>
+        <common-events.version>1.0.0</common-events.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -80,7 +84,7 @@
 		<dependency>
 			<groupId>com.mymicroservices</groupId>
 			<artifactId>common-events</artifactId>
-			<version>1.0.0</version>
+            <version>${common-events.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -132,19 +136,19 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.4</version>
+            <version>${logstash-logback-encoder.version}</version>
         </dependency>
 		<!-- WireMock for mocking HTTP requests -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-contract-wiremock</artifactId>
-			<version>4.1.1</version>
+            <version>${spring-cloud-contract-wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webflux</artifactId>
-			<version>6.1.13</version>
+            <version>${spring-webflux.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

@@ -4,6 +4,7 @@ import com.mymicroservice.paymentservice.util.KafkaMdcUtil;
 import org.mymicroservices.common.events.PaymentEventDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 public class PaymentEventProducer {
 
     private final KafkaTemplate<String, PaymentEventDto> kafkaTemplate;
-    private final String TOPIC = "create-payment";
+
+    @Value("${kafka.producer.topics.create-payment}")
+    private String paymentTopic;
 
     public void sendCreatePayment(PaymentEventDto event) {
 
@@ -26,7 +29,7 @@ public class PaymentEventProducer {
         Message<PaymentEventDto> message = KafkaMdcUtil.addMdcToMessage(
                 event,
                 event.getOrderId(),
-                TOPIC
+                paymentTopic
         );
 
         kafkaTemplate.send(message)
@@ -39,5 +42,4 @@ public class PaymentEventProducer {
                     }
                 });
     }
-
 }

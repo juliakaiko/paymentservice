@@ -1,6 +1,7 @@
 package com.mymicroservice.paymentservice.kafka;
 
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.Acknowledgment;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
@@ -21,16 +22,23 @@ import java.time.Duration;
 public class OrderEventListener {
 
     private final PaymentService paymentService;
-    private final String SERVICE_NAME = "paymentservice";
+    private static final String REQUEST_ID_HEADER = "X-Request-Id";
+    private static final String SOURCE_SERVICE_HEADER = "X-Source-Service";
 
-    @KafkaListener(topics = "create-order", groupId = "payment-service-group")
+    @Value("${spring.application.name}")
+    private String serviceName;
+
+    @KafkaListener(
+            topics = "${kafka.consumer.topics.create-order}",
+            groupId = "${kafka.consumer.group-id}"
+    )
     public void onCreateOrder(
             @Payload OrderEventDto event,
             @Header(KafkaHeaders.RECEIVED_KEY) String key,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
-            @Header("X-Request-Id") String requestId,
-            @Header("X-Source-Service") String sourceService,
+            @Header(value = REQUEST_ID_HEADER) String requestId,
+            @Header(value = SOURCE_SERVICE_HEADER) String sourceService,
             Acknowledgment ack) {
 
         if (requestId != null) {
@@ -39,13 +47,15 @@ public class OrderEventListener {
         if (sourceService != null) {
             MDC.put("sourceService", sourceService);
         }
-        MDC.put("serviceName", SERVICE_NAME);
+        MDC.put("serviceName", serviceName);
 
         try {
             log.info("Received CREATE_ORDER event [key: {}, partition: {}, offset: {}]: {}",
                     key, partition, offset, event);
 
             PaymentEventDto saved = paymentService.createPayment(event);
+            log.info("Successfully saved payment: {}", saved);
+
             ack.acknowledge(); // commit offset
             log.info("Successfully processed payment for order: {}", event.getOrderId());
         } catch (Exception e) {

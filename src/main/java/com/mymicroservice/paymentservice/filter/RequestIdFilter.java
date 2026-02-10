@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,7 +21,9 @@ import java.util.UUID;
 public class RequestIdFilter extends OncePerRequestFilter {
 
     private static final String REQUEST_ID = "requestId";
-    private static final String SERVICE_NAME = "paymentservicee";
+
+    @Value("${spring.application.name}")
+    private String serviceName;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -31,7 +34,7 @@ public class RequestIdFilter extends OncePerRequestFilter {
                 .orElse(UUID.randomUUID().toString());
 
         MDC.put(REQUEST_ID, requestId);
-        MDC.put("serviceName", SERVICE_NAME);
+        MDC.put("serviceName", serviceName);
 
         response.setHeader("X-Request-Id", requestId);
 
