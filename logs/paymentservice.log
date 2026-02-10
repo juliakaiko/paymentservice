@@ -1,0 +1,56 @@
+{"@timestamp":"2026-02-10T14:18:50.5651568+03:00","thread_name":"main","message":"Starting PaymentControllerTest using Java 21.0.6 with PID 20488 (started by pugac in D:\\Julia\\INNOWICE\\rootproject\\paymentservice)"}
+{"@timestamp":"2026-02-10T14:18:50.5745804+03:00","thread_name":"main","message":"The following 1 profile is active: \"test\""}
+{"@timestamp":"2026-02-10T14:18:53.9814095+03:00","thread_name":"main","message":"Started PaymentControllerTest in 4.872 seconds (process running for 6.44)"}
+{"@timestamp":"2026-02-10T14:18:54.0330851+03:00","thread_name":"main","message":"▶ Running test: getPaymentsByStatuses_ShouldReturnList(), statuses=[PAID, PENDING]"}
+{"@timestamp":"2026-02-10T14:18:54.184221+03:00","thread_name":"main","message":"Request to get payment records by statuses: [PAID, PENDING]"}
+{"@timestamp":"2026-02-10T14:18:54.3502975+03:00","thread_name":"main","message":"▶ Running test: getPaymentById_ShouldReturnPaymentEventDto(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.3528235+03:00","thread_name":"main","message":"Request to find the Payment record by id: test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.3658593+03:00","thread_name":"main","message":"▶ Running test: getPaymentsByUser_ShouldReturnList(), USER_ID=1"}
+{"@timestamp":"2026-02-10T14:18:54.3678527+03:00","thread_name":"main","message":"Request to get payment records by userId: 1"}
+{"@timestamp":"2026-02-10T14:18:54.3784283+03:00","thread_name":"main","message":"▶ Running test: updatePayment_ShouldReturnNotFound(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.4734248+03:00","thread_name":"main","message":"Request to update the Payment record: PaymentRequestDto(orderId=1, userId=1, paymentAmount=1000.00)"}
+{"@timestamp":"2026-02-10T14:18:54.4831579+03:00","thread_name":"main","message":"▶ Running test: deletePayment_ShouldReturnNotFound(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.4859079+03:00","thread_name":"main","message":"Request to delete the Payment by id: test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.4956468+03:00","thread_name":"main","message":"▶ Running test: getPaymentsByOrder_ShouldReturnList(), ORDER_ID=1"}
+{"@timestamp":"2026-02-10T14:18:54.4976499+03:00","thread_name":"main","message":"Request to get payment records by orderId: 1"}
+{"@timestamp":"2026-02-10T14:18:54.5062395+03:00","thread_name":"main","message":"▶ Running test: getPaymentById_ShouldReturnNotFound(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.5082453+03:00","thread_name":"main","message":"Request to find the Payment record by id: test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.5163941+03:00","thread_name":"main","message":"▶ Running test: updatePayment_ShouldReturnUpdatedPaymentEventDto(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.5199146+03:00","thread_name":"main","message":"Request to update the Payment record: PaymentRequestDto(orderId=1, userId=1, paymentAmount=1000.00)"}
+{"@timestamp":"2026-02-10T14:18:54.5294036+03:00","thread_name":"main","message":"▶ Running test: createPayment_ShouldReturnCreatedPaymentEventDto(), OrdertEvent=OrderEventDto(orderId=1, userId=1, paymentAmount=1000.00)"}
+{"@timestamp":"2026-02-10T14:18:54.5324661+03:00","thread_name":"main","message":"Request to add a new Payment record: PaymentRequestDto(orderId=1, userId=1, paymentAmount=1000.0)"}
+{"@timestamp":"2026-02-10T14:18:54.540978+03:00","thread_name":"main","message":"▶ Running test: deletePayment_ShouldReturnDeletedPaymentEventDto(), PAYMENT_ID=test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.5436541+03:00","thread_name":"main","message":"Request to delete the Payment by id: test-payment-1"}
+{"@timestamp":"2026-02-10T14:18:54.5532039+03:00","thread_name":"main","message":"▶ Running test: getTotalSumForPeriod_ShouldReturnSum(), start=2025-01-01T00:00, end=2025-12-31T23:59"}
+{"@timestamp":"2026-02-10T14:18:54.5589918+03:00","thread_name":"main","message":"Request to get the sum of payments for the period: 2025-01-01T00:00 - 2025-12-31T23:59"}
+{"@timestamp":"2026-02-10T14:19:00.2283067+03:00","thread_name":"main","message":"Starting PaymentserviceApplicationTests using Java 21.0.6 with PID 20488 (started by pugac in D:\\Julia\\INNOWICE\\rootproject\\paymentservice)"}
+{"@timestamp":"2026-02-10T14:19:00.2283067+03:00","thread_name":"main","message":"The following 1 profile is active: \"test\""}
+{"@timestamp":"2026-02-10T14:19:05.4844689+03:00","thread_name":"main","message":"Started PaymentserviceApplicationTests in 5.308 seconds (process running for 17.943)"}
+{"@timestamp":"2026-02-10T14:19:10.5257115+03:00","thread_name":"main","message":"Starting PaymentRepositoryTest using Java 21.0.6 with PID 20488 (started by pugac in D:\\Julia\\INNOWICE\\rootproject\\paymentservice)"}
+{"@timestamp":"2026-02-10T14:19:10.5257115+03:00","thread_name":"main","message":"The following 1 profile is active: \"test\""}
+{"@timestamp":"2026-02-10T14:19:10.6668284+03:00","thread_name":"main","message":"Started PaymentRepositoryTest in 0.163 seconds (process running for 23.126)"}
+{"@timestamp":"2026-02-10T14:19:10.8195424+03:00","thread_name":"main","message":"▶ Running test: testFindByUserId(), UserId=1"}
+{"@timestamp":"2026-02-10T14:19:10.9206521+03:00","thread_name":"main","message":"▶ Running test: testFindByTimestampBetween()"}
+{"@timestamp":"2026-02-10T14:19:10.9480815+03:00","thread_name":"main","message":"▶ Running test: testFindByStatusIn()"}
+{"@timestamp":"2026-02-10T14:19:10.9727265+03:00","thread_name":"main","message":"▶ Running test: testFindByOrderId(), OrderId=1"}
+{"@timestamp":"2026-02-10T14:19:11.8524627+03:00","thread_name":"main","message":"getPaymentById(): test-payment-1"}
+{"@timestamp":"2026-02-10T14:19:11.8534575+03:00","thread_name":"main","message":"getPaymentById_WhenExists_ReturnsPaymentEventDto(): PaymentId=test-payment-1"}
+{"@timestamp":"2026-02-10T14:19:11.9111627+03:00","thread_name":"main","message":"getPaymentsByStatuses(): [PAID, FAILED]"}
+{"@timestamp":"2026-02-10T14:19:11.9131705+03:00","thread_name":"main","message":"getPaymentsByStatuses_ReturnsList()"}
+{"@timestamp":"2026-02-10T14:19:11.9237814+03:00","thread_name":"main","message":"getPaymentsByOrderId(): 1"}
+{"@timestamp":"2026-02-10T14:19:11.9258011+03:00","thread_name":"main","message":"getPaymentsByOrderId_ReturnsList()"}
+{"@timestamp":"2026-02-10T14:19:11.9325134+03:00","thread_name":"main","message":"updatePayment_WhenNotExists_ThrowsException()"}
+{"@timestamp":"2026-02-10T14:19:11.9441681+03:00","thread_name":"main","message":"deletePaymentById_WhenNotExists_ThrowsException()"}
+{"@timestamp":"2026-02-10T14:19:11.9566105+03:00","thread_name":"main","message":"getTotalSumForPeriod_ReturnsSum()"}
+{"@timestamp":"2026-02-10T14:19:11.9566105+03:00","thread_name":"main","message":"getTotalSumForPeriod(): 2024-12-31T01:10:01 - 2025-02-03T02:20:02"}
+{"@timestamp":"2026-02-10T14:19:11.9576196+03:00","thread_name":"main","message":"Payment: id=test-payment-1, timestamp=2025-01-01T01:10:01, amount=1000.0, status=PAID"}
+{"@timestamp":"2026-02-10T14:19:11.9586202+03:00","thread_name":"main","message":"Payment: id=test-payment-2, timestamp=2025-02-02T02:20:02, amount=2000.0, status=FAILED"}
+{"@timestamp":"2026-02-10T14:19:11.9697889+03:00","thread_name":"main","message":"updatePayment(): PaymentEntity(id=test-payment-1, orderId=1, userId=1, status=FAILED, timestamp=2025-01-01T01:10:01, paymentAmount=1000.0)"}
+{"@timestamp":"2026-02-10T14:19:11.9812977+03:00","thread_name":"main","message":"getPaymentById_WhenExists_ReturnsPaymentEventDto(): PaymentId=test-payment-1"}
+{"@timestamp":"2026-02-10T14:19:11.9913742+03:00","thread_name":"main","message":"createPayment(): PaymentEntity(id=null, orderId=1, userId=1, status=PAID, timestamp=2026-02-10T14:19:11, paymentAmount=1000.0)"}
+{"@timestamp":"2026-02-10T14:19:11.9983678+03:00","thread_name":"main","message":"createNewPayment_ReturnsPaymentEventDto(): OrderEventDto(orderId=1, userId=1, paymentAmount=1000.0)"}
+{"@timestamp":"2026-02-10T14:19:12.0099336+03:00","thread_name":"main","message":"getPaymentById_WhenNotExists_ThrowsException()"}
+{"@timestamp":"2026-02-10T14:19:12.019966+03:00","thread_name":"main","message":"deletePaymentById(): test-payment-1"}
+{"@timestamp":"2026-02-10T14:19:12.019966+03:00","thread_name":"main","message":"deletePaymentById_WhenExists_DeletesAndReturnsPaymentEventDto(): PaymentId=test-payment-1"}
+{"@timestamp":"2026-02-10T14:19:12.0254886+03:00","thread_name":"main","message":"getPaymentsByUserId(): 1"}
+{"@timestamp":"2026-02-10T14:19:12.0279987+03:00","thread_name":"main","message":"getPaymentsByUserId_ReturnsList()"}
