@@ -16,7 +16,10 @@ import org.springframework.messaging.handler.annotation.Header;
 
 import java.time.Duration;
 
-@Component
+/*
+    Listener, который слушает напрямую с Kafka (заменен на Inbox)
+ */
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class OrderEventListener {
@@ -24,6 +27,7 @@ public class OrderEventListener {
     private final PaymentService paymentService;
     private static final String REQUEST_ID_HEADER = "X-Request-Id";
     private static final String SOURCE_SERVICE_HEADER = "X-Source-Service";
+    private static final String IDEMPOTENCE_ID_HEADER = "X-Idempotence-Id";
 
     @Value("${spring.application.name}")
     private String serviceName;
@@ -41,13 +45,7 @@ public class OrderEventListener {
             @Header(value = SOURCE_SERVICE_HEADER) String sourceService,
             Acknowledgment ack) {
 
-        if (requestId != null) {
-            MDC.put("requestId", requestId);
-        }
-        if (sourceService != null) {
-            MDC.put("sourceService", sourceService);
-        }
-        MDC.put("serviceName", serviceName);
+        setUpMDC(requestId, sourceService);
 
         try {
             log.info("Received CREATE_ORDER event [key: {}, partition: {}, offset: {}]: {}",
@@ -65,5 +63,13 @@ public class OrderEventListener {
         } finally {
             MDC.clear();
         }
+    }
+
+    private void setUpMDC(String requestId, String sourceService) {
+        if (requestId != null)
+            MDC.put("requestId", requestId);
+        if (sourceService != null)
+            MDC.put("sourceService", sourceService);
+        MDC.put("serviceName", serviceName);
     }
 }

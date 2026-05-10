@@ -1,7 +1,7 @@
 package com.mymicroservice.paymentservice.util;
 
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -37,7 +37,7 @@ public class PaymentDataLoader implements CommandLineRunner {
                         .id("payment-1")
                         .orderId("7")
                         .userId("1")
-                        .status(Status.PAID)
+                        .status(PaimentStatus.PAID)
                         .timestamp(LocalDateTime.of(2025, 5, 18, 17, 10, 25))
                         .paymentAmount(BigDecimal.valueOf(500000, 2))
                         .build(),
@@ -45,7 +45,7 @@ public class PaymentDataLoader implements CommandLineRunner {
                         .id("payment-2")
                         .orderId("2")
                         .userId("2")
-                        .status(Status.FAILED)
+                        .status(PaimentStatus.FAILED)
                         .timestamp(LocalDateTime.of(2025, 9, 5, 11, 30, 1))
                         .paymentAmount(BigDecimal.valueOf(100000, 2))
                         .build(),
@@ -53,7 +53,7 @@ public class PaymentDataLoader implements CommandLineRunner {
                         .id("payment-3")
                         .orderId("11")
                         .userId("1")
-                        .status(Status.FAILED)
+                        .status(PaimentStatus.FAILED)
                         .timestamp(LocalDateTime.of(2025, 7, 22, 11, 30, 1))
                         .paymentAmount(BigDecimal.valueOf(100000, 2))
                         .build()

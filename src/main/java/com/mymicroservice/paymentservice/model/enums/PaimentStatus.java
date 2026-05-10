@@ -1,9 +1,9 @@
-package com.mymicroservice.paymentservice.model;
+package com.mymicroservice.paymentservice.model.enums;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum Status {
+public enum PaimentStatus {
 
     PAID ("PAID"),
     FAILED("FAILED");

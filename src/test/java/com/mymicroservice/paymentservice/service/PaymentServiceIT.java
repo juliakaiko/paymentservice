@@ -5,7 +5,7 @@ import com.mymicroservice.paymentservice.dto.PaymentRequestDto;
 import com.mymicroservice.paymentservice.kafka.OrderEventListener;
 import com.mymicroservice.paymentservice.mapper.PaymentRequestMapper;
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import com.mymicroservice.paymentservice.service.impl.PaymentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -120,7 +120,7 @@ public class PaymentServiceIT {
         assertNotNull(dto.getId());
         assertEquals("1", dto.getOrderId());
         assertEquals("1", dto.getUserId());
-        assertEquals(Status.PAID.name(), dto.getStatus());
+        assertEquals(PaimentStatus.PAID.name(), dto.getStatus());
 
         PaymentEntity saved = paymentRepository.findById(dto.getId()).orElseThrow();
 
@@ -224,10 +224,10 @@ public class PaymentServiceIT {
         PaymentEventDto dto = paymentService.createPayment(orderEventDto);
         log.info("getPaymentsByStatuses_returnsList()");
 
-        List<PaymentEventDto> list = paymentService.getPaymentsByStatuses(List.of(Status.PAID.name(), Status.FAILED.name()));
+        List<PaymentEventDto> list = paymentService.getPaymentsByStatuses(List.of(PaimentStatus.PAID.name(), PaimentStatus.FAILED.name()));
 
         assertFalse(list.isEmpty());
-        assertTrue(List.of(Status.PAID.name(), Status.FAILED.name()).contains(list.get(0).getStatus()));
+        assertTrue(List.of(PaimentStatus.PAID.name(), PaimentStatus.FAILED.name()).contains(list.get(0).getStatus()));
     }
 
     @Test

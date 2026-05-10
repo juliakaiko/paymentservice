@@ -12,23 +12,15 @@
     </preConditions>
 
     <changeSet id="0" author="julia_kaiko">
-        <tagDatabase tag="db_init"/>
+        <tagDatabase tag="mongodb_init"/>
     </changeSet>
 
     <include file="v.1.0/db.changelog-v.1.0.xml" relativeToChangelogFile="true"/>
-
     <changeSet id="1" author="julia_kaiko">
         <tagDatabase tag="v.1.0"/>
     </changeSet>
 
-    <include file="v.2.0/db.changelog-v.2.0.xml" relativeToChangelogFile="true"/>
-
-    <changeSet id="2" author="julia_kaiko">
-        <tagDatabase tag="v.2.0"/>
-    </changeSet>
-
     <!--<include file="v.3.0/db.changelog-v.3.0.xml" relativeToChangelogFile="true"/>
-
     <changeSet id="3" author="julia_kaiko">
         <tagDatabase tag="v.3.0"/>
     </changeSet>-->

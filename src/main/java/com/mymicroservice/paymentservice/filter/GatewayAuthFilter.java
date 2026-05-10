@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,12 +28,20 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
     private static final String SOURCE_SERVICE_HEADER = "X-Source-Service";
     private static final String GATEWAY_SERVICE_NAME = "gateway";
 
+    @Value("#{'${security.public.endpoints}'.split(',')}")
+    private List<String> publicEndpoints;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
+
+        if (publicEndpoints.stream().anyMatch(path::startsWith)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             if (isGatewayCall(request)) {

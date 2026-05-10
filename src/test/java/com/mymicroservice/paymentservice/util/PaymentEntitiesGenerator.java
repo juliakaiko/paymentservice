@@ -1,7 +1,7 @@
 package com.mymicroservice.paymentservice.util;
 
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ public class PaymentEntitiesGenerator {
                 .id("test-payment-1")
                 .userId("1")
                 .orderId("1")
-                .status(Status.PAID)
+                .status(PaimentStatus.PAID)
                 .timestamp(LocalDateTime.of(2025, 1, 1, 1, 10, 1))
                 .paymentAmount(BigDecimal.valueOf(1000.00))
                 .build();
@@ -23,7 +23,7 @@ public class PaymentEntitiesGenerator {
                 .id("test-payment-2")
                 .userId("2")
                 .orderId("2")
-                .status(Status.FAILED)
+                .status(PaimentStatus.FAILED)
                 .timestamp(LocalDateTime.of(2025, 2, 2, 2, 20, 2))
                 .paymentAmount(BigDecimal.valueOf(2000.00))
                 .build();

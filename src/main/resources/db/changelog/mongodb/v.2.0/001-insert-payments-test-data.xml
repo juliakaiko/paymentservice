@@ -9,7 +9,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="003-insert-payments-test-data" author="julia_kaiko" context="dev">
+    <changeSet id="001-insert-payments-test-data" author="julia_kaiko" context="dev">
         <ext:insertOne collectionName="payments">
             <ext:document>
                 {

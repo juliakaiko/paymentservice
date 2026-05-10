@@ -2,7 +2,7 @@ package com.mymicroservice.paymentservice.repository;
 
 import com.mymicroservice.paymentservice.config.MongoTestcontainersConfig;
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -64,7 +64,7 @@ public class PaymentRepositoryTest extends MongoTestcontainersConfig {
         assertThat(result).hasSize(2);
         assertThat(result)
                 .extracting(PaymentEntity::getStatus)
-                .containsExactlyInAnyOrder(Status.FAILED, Status.PAID);
+                .containsExactlyInAnyOrder(PaimentStatus.FAILED, PaimentStatus.PAID);
     }
 
     @Test

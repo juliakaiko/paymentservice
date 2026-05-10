@@ -6,18 +6,20 @@ import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
 import liquibase.ext.mongodb.database.MongoLiquibaseDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class MongoLiquibaseConfig {
 
     @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
 
-    @Value("${liquibase.change-log:db/changelog/db.changelog-master.xml}")
+    @Value("${liquibase.change-log:db/changelog/mongodb/db.changelog-master.xml}")
     private String changeLog;
 
     @Value("${spring.profiles.active:}")
@@ -44,7 +46,7 @@ public class MongoLiquibaseConfig {
                 var contexts = new Contexts(contextName);
                 liquibase.update(contexts, new LabelExpression());
 
-                System.out.println("Liquibase migration completed successfully for context: " + contextName);
+                log.info("Liquibase migration completed successfully for context: " + contextName);
             }
         };
     }

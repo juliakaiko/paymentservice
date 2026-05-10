@@ -5,7 +5,7 @@ import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.kafka.PaymentEventProducer;
 import com.mymicroservice.paymentservice.mapper.PaymentRequestMapper;
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import com.mymicroservice.paymentservice.service.impl.PaymentServiceImpl;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
@@ -73,7 +73,7 @@ public class PaymentServiceImplTest {
         PaymentEventDto result = paymentService.createPayment(orderEventDto);
         log.info("createNewPayment_ReturnsPaymentEventDto(): {}", orderEventDto);
 
-        assertEquals(Status.PAID.toString(), result.getStatus());
+        assertEquals(PaimentStatus.PAID.toString(), result.getStatus());
         verify(paymentRepository, times(1)).save(any(PaymentEntity.class));
         verify(paymentEventProducer).sendCreatePayment(any());
     }
@@ -113,7 +113,7 @@ public class PaymentServiceImplTest {
         PaymentEventDto result = paymentService.updatePayment(entity.getId(), orderEventDto);
         log.info("getPaymentById_WhenExists_ReturnsPaymentEventDto(): PaymentId={}", entity.getId());
 
-        assertEquals(Status.FAILED.toString(), result.getStatus());
+        assertEquals(PaimentStatus.FAILED.toString(), result.getStatus());
         assertEquals(orderEventDto.getOrderId(), result.getOrderId());
         assertEquals(orderEventDto.getUserId(), result.getUserId());
     }

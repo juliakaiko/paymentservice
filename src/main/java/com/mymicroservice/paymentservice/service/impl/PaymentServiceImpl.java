@@ -3,7 +3,7 @@ package com.mymicroservice.paymentservice.service.impl;
 import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.kafka.PaymentEventProducer;
 import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.Status;
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
 import com.mymicroservice.paymentservice.mapper.OrderEventMapper;
@@ -14,6 +14,7 @@ import com.mymicroservice.paymentservice.webclient.RandomNumberClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,14 +26,16 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
+    private final PaymentEventProducer paymentEventProducer;
     private final PaymentRepository paymentRepository;
     private final RandomNumberClient randomNumberClient;
-    private final PaymentEventProducer paymentEventProducer;
 
+    @Override
+   // @Transactional
     public PaymentEventDto createPayment(OrderEventDto dto) {
         PaymentEntity entity = OrderEventMapper.INSTANCE.toEntity(dto);
         int random = randomNumberClient.generateRandNum();
-        entity.setStatus(random % 2 == 0 ? Status.PAID : Status.FAILED);
+        entity.setStatus(random % 2 == 0 ? PaimentStatus.PAID : PaimentStatus.FAILED);
         log.info("createPayment(): {}", entity);
         PaymentEventDto responseDto = PaymentResponseMapper.INSTANCE.toDto(paymentRepository.save(entity));
         paymentEventProducer.sendCreatePayment(responseDto);
@@ -40,6 +43,8 @@ public class PaymentServiceImpl implements PaymentService {
         return responseDto;
     }
 
+    @Override
+    //@Transactional
     public PaymentEventDto getPaymentById(String id) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -47,6 +52,8 @@ public class PaymentServiceImpl implements PaymentService {
         return PaymentResponseMapper.INSTANCE.toDto(entity);
     }
 
+    @Override
+    //@Transactional
     public PaymentEventDto updatePayment(String id, OrderEventDto dtoDetails) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -54,12 +61,14 @@ public class PaymentServiceImpl implements PaymentService {
         entity.setUserId(dtoDetails.getUserId());
         entity.setPaymentAmount(dtoDetails.getPaymentAmount());
         int random = randomNumberClient.generateRandNum();
-        entity.setStatus(random % 2 == 0 ? Status.PAID : Status.FAILED);
+        entity.setStatus(random % 2 == 0 ? PaimentStatus.PAID : PaimentStatus.FAILED);
         log.info("updatePayment(): {}", entity);
 
         return PaymentResponseMapper.INSTANCE.toDto(paymentRepository.save(entity));
     }
 
+    @Override
+   // @Transactional
     public PaymentEventDto deletePaymentById(String id) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -68,24 +77,32 @@ public class PaymentServiceImpl implements PaymentService {
         return PaymentResponseMapper.INSTANCE.toDto(entity);
     }
 
+    @Override
+    //@Transactional
     public List<PaymentEventDto> getPaymentsByOrderId(String orderId) {
         log.info("getPaymentsByOrderId(): {}", orderId);
         List<PaymentEntity> payments = paymentRepository.findByOrderId(orderId);
         return payments.stream().map(PaymentResponseMapper.INSTANCE::toDto).toList();
     }
 
+    @Override
+   // @Transactional
     public List<PaymentEventDto> getPaymentsByUserId(String userId) {
         log.info("getPaymentsByUserId(): {}", userId);
         List<PaymentEntity> payments = paymentRepository.findByUserId(userId);
         return payments.stream().map(PaymentResponseMapper.INSTANCE::toDto).toList();
     }
 
+    @Override
+    //@Transactional
     public List<PaymentEventDto> getPaymentsByStatuses(List<String> statuses) {
         log.info("getPaymentsByStatuses(): {}", statuses);
         List<PaymentEntity> payments = paymentRepository.findByStatusIn(statuses);
         return payments.stream().map(PaymentResponseMapper.INSTANCE::toDto).toList();
     }
 
+    @Override
+   // @Transactional
     public BigDecimal getTotalSumForPeriod(LocalDateTime start, LocalDateTime end) {
         log.info("getTotalSumForPeriod(): {} - {}", start, end);
         List<PaymentEntity> payments = paymentRepository.findByTimestampBetween(start, end);

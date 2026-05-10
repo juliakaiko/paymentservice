@@ -1,5 +1,6 @@
 package com.mymicroservice.paymentservice.model;
 
+import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
 import org.springframework.data.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +28,7 @@ public class PaymentEntity {
     @Field("user_id")
     private String userId;
 
-    private Status status;
+    private PaimentStatus status;
 
     private LocalDateTime timestamp;
 
