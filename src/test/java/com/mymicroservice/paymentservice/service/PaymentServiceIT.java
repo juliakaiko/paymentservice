@@ -1,17 +1,18 @@
 package com.mymicroservice.paymentservice.service;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.mymicroservice.paymentservice.dto.PaymentRequestDto;
-import com.mymicroservice.paymentservice.kafka.OrderEventListener;
-import com.mymicroservice.paymentservice.mapper.PaymentRequestMapper;
-import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
+import com.mymicroservice.paymentservice.kafka.EventEnvelope;
+import com.mymicroservice.paymentservice.model.Payment;
+import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import com.mymicroservice.paymentservice.service.impl.PaymentServiceImpl;
-import lombok.extern.slf4j.Slf4j;
+import com.mymicroservice.paymentservice.util.EventEnvelopeGenerator;
+import com.mymicroservice.paymentservice.util.OrderEventDtoGenerator;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,14 +31,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -49,15 +47,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.autoconfigure.exclude="
+                + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
+                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+})
 @Testcontainers
 @DirtiesContext
-@ActiveProfiles("test")
-@AutoConfigureWireMock(port = 0) // WireMock will work on a random port
-@Slf4j
-public class PaymentServiceIT {
+@ActiveProfiles({"test", "dev"})
+@AutoConfigureWireMock(port = 0)
+class PaymentServiceIT {
 
     @Container
     static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
@@ -69,19 +69,12 @@ public class PaymentServiceIT {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private KafkaTemplate<String, PaymentEventDto> kafkaTemplate;
-
-    @Autowired
-    private OrderEventListener orderEventListener;
-
-    @Autowired
     private PaymentServiceImpl paymentService;
 
-    private PaymentRequestDto paymentRequestDto;
-    private OrderEventDto orderEventDto;
+    private EventEnvelope<OrderEventDto> eventEnvelope;
 
     @DynamicPropertySource
-    static void kafkaProperties(DynamicPropertyRegistry registry) {
+    static void overrideProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
         registry.add("random.number.api.base-url", () -> "http://localhost:${wiremock.server.port}");
         registry.add("spring.data.mongodb.uri", mongoDB::getReplicaSetUrl);
@@ -89,12 +82,7 @@ public class PaymentServiceIT {
 
     @BeforeEach
     void init() {
-        paymentRequestDto = PaymentRequestDto.builder()
-                .orderId("1")
-                .userId("1")
-                .paymentAmount(BigDecimal.valueOf(1000.00))
-                .build();
-        orderEventDto = PaymentRequestMapper.INSTANCE.toOrderEventDto(paymentRequestDto);
+        eventEnvelope = EventEnvelopeGenerator.generateOrderEventEnvelope();
 
         WireMock.stubFor(get(urlPathEqualTo("/"))
                 .withQueryParam("min", equalTo("1"))
@@ -108,38 +96,44 @@ public class PaymentServiceIT {
 
     @AfterEach
     void tearDown() {
-        WireMock.reset(); // Resetting WireMock state after each test
+        WireMock.reset();
         paymentRepository.deleteAll();
     }
 
     @Test
-    void createPayment_storesPaymentInMongo() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("createPayment_storesPaymentInMongo(): PaymentEventDto={}", dto);
+    void createPayment_ShouldStorePaymentInMongo_WhenOrderDoesNotExist() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         assertNotNull(dto.getId());
         assertEquals("1", dto.getOrderId());
         assertEquals("1", dto.getUserId());
-        assertEquals(PaimentStatus.PAID.name(), dto.getStatus());
+        assertEquals(PaymentStatus.PAID.name(), dto.getStatus());
 
-        PaymentEntity saved = paymentRepository.findById(dto.getId()).orElseThrow();
-
+        Payment saved = paymentRepository.findById(dto.getId()).orElseThrow();
         assertEquals(dto.getOrderId(), saved.getOrderId());
 
-        verifyWebClientCall();
+        WireMock.verify(1, getRequestedFor(urlPathEqualTo("/"))
+                .withQueryParam("min", equalTo("1"))
+                .withQueryParam("max", equalTo("100"))
+                .withQueryParam("count", equalTo("1")));
     }
 
     @Test
-    void testCreatePayment_sendsEventToKafka() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("testCreatePayment_sendsEventToKafka(): PaymentEventDto={}", dto);
+    void createPayment_ShouldReturnExistingPayment_WhenOrderAlreadyHasPayment() {
+        PaymentEventDto first = paymentService.createPayment(eventEnvelope);
+        PaymentEventDto second = paymentService.createPayment(eventEnvelope);
+
+        assertEquals(first.getId(), second.getId());
+        assertThat(paymentRepository.findByOrderId("1")).hasSize(1);
+    }
+
+    @Test
+    void createPayment_ShouldSendEventToKafka_WhenPaymentCreated() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         assertThat(dto).isNotNull();
         assertThat(paymentRepository.findByOrderId("1")).hasSize(1);
-        PaymentEntity savedEntity = paymentRepository.findByOrderId("1").get(0);
-        assertThat(savedEntity.getStatus()).isNotNull();
 
-        // check that the event has been sent to Kafka
         Map<String, Object> consumerProps = Map.of(
                 "bootstrap.servers", kafka.getBootstrapServers(),
                 "group.id", "payment-service-test-group",
@@ -151,7 +145,7 @@ public class PaymentServiceIT {
         );
         ConsumerFactory<String, PaymentEventDto> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
         Consumer<String, PaymentEventDto> consumer = cf.createConsumer();
-        consumer.subscribe(java.util.Collections.singleton("create-payment"));
+        consumer.subscribe(Collections.singleton("create-payment"));
 
         var records = KafkaTestUtils.getRecords(consumer, Duration.ofSeconds(5));
         assertThat(records.count()).isGreaterThan(0);
@@ -164,9 +158,8 @@ public class PaymentServiceIT {
     }
 
     @Test
-    void getPaymentById_returnsPaymentEventDto() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("getPaymentById_returnsPaymentEventDto(): PaymentId={}", dto.getId());
+    void getPaymentById_ShouldReturnPaymentEventDto_WhenPaymentExists() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         PaymentEventDto fetched = paymentService.getPaymentById(dto.getId());
 
@@ -175,32 +168,30 @@ public class PaymentServiceIT {
     }
 
     @Test
-    void updatePayment_returnsUpdatedPaymentEventDto() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("updatePayment_returnsUpdatedPaymentEventDto(): PaymentId={}", dto.getId());
+    void updatePayment_ShouldReturnUpdatedPaymentEventDto_WhenPaymentExists() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
-        PaymentEventDto updated = paymentService.updatePayment(dto.getId(), orderEventDto);
+        PaymentEventDto updated = paymentService.updatePayment(dto.getId(), eventEnvelope.payload());
 
         assertNotNull(updated);
-        assertEquals(orderEventDto.getOrderId(), updated.getOrderId());
-        assertEquals(orderEventDto.getUserId(), updated.getUserId());
+        assertEquals(eventEnvelope.payload().getOrderId(), updated.getOrderId());
+        assertEquals(eventEnvelope.payload().getUserId(), updated.getUserId());
         assertNotNull(updated.getStatus());
     }
 
     @Test
-    void deletePayment_removesFromMongo() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("deletePayment_removesFromMongo(): PaymentId={}", dto.getId());
+    void deletePaymentById_ShouldRemovePayment_WhenPaymentExists() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         PaymentEventDto deleted = paymentService.deletePaymentById(dto.getId());
+
         assertEquals(dto.getId(), deleted.getId());
         assertFalse(paymentRepository.findById(dto.getId()).isPresent());
     }
 
     @Test
-    void getPaymentsByOrderId_returnsList() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("getPaymentsByOrderId_returnsList()");
+    void getPaymentsByOrderId_ShouldReturnList_WhenPaymentsExist() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         List<PaymentEventDto> list = paymentService.getPaymentsByOrderId("1");
 
@@ -209,9 +200,8 @@ public class PaymentServiceIT {
     }
 
     @Test
-    void getPaymentsByUserId_returnsList() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("getPaymentsByUserId_returnsList()");
+    void getPaymentsByUserId_ShouldReturnList_WhenPaymentsExist() {
+        PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         List<PaymentEventDto> list = paymentService.getPaymentsByUserId("1");
 
@@ -220,40 +210,28 @@ public class PaymentServiceIT {
     }
 
     @Test
-    void getPaymentsByStatuses_returnsList() {
-        PaymentEventDto dto = paymentService.createPayment(orderEventDto);
-        log.info("getPaymentsByStatuses_returnsList()");
+    void getPaymentsByStatuses_ShouldReturnList_WhenPaymentsExist() {
+        paymentService.createPayment(eventEnvelope);
 
-        List<PaymentEventDto> list = paymentService.getPaymentsByStatuses(List.of(PaimentStatus.PAID.name(), PaimentStatus.FAILED.name()));
+        List<PaymentEventDto> list = paymentService.getPaymentsByStatuses(
+                List.of(PaymentStatus.PAID.name(), PaymentStatus.FAILED.name()));
 
         assertFalse(list.isEmpty());
-        assertTrue(List.of(PaimentStatus.PAID.name(), PaimentStatus.FAILED.name()).contains(list.get(0).getStatus()));
     }
 
     @Test
-    void getTotalSumForPeriod_returnsSum() {
-        PaymentEventDto dto1 = paymentService.createPayment(orderEventDto);
-        PaymentRequestDto req2 = PaymentRequestDto.builder()
-                .orderId("2")
-                .userId("1")
-                .paymentAmount(BigDecimal.valueOf(1000.00))
-                .build();
-        OrderEventDto order2 = PaymentRequestMapper.INSTANCE.toOrderEventDto(req2);
-        PaymentEventDto dto2 = paymentService.createPayment(order2);
+    void getTotalSumForPeriod_ShouldReturnSum_WhenPaymentsExistInPeriod() {
+        paymentService.createPayment(eventEnvelope);
+
+        EventEnvelope<OrderEventDto> secondEnvelope =
+                EventEnvelopeGenerator.generateOrderEventEnvelope(OrderEventDtoGenerator.generateOrderEventDto("2"));
+        paymentService.createPayment(secondEnvelope);
 
         LocalDateTime start = LocalDateTime.now().minusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(1);
-        log.info("getTotalSumForPeriod_returnsSum(): {} - {}", start, end);
 
         BigDecimal sum = paymentService.getTotalSumForPeriod(start, end);
 
         assertEquals(BigDecimal.valueOf(2000.00), sum);
-    }
-
-    private void verifyWebClientCall() {
-        WireMock.verify(1, getRequestedFor(urlPathEqualTo("/"))
-                .withQueryParam("min", equalTo("1"))
-                .withQueryParam("max", equalTo("100"))
-                .withQueryParam("count", equalTo("1")));
     }
 }

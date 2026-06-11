@@ -12,7 +12,7 @@
         <ext:createIndex
                 collectionName="payments"
                 keys="{ order_id: 1 }"
-                options="{ name: 'idx_payments_order_id' }"/>
+                options="{ name: 'idx_payments_order_id_unique', unique: true }"/>
 
         <ext:createIndex
                 collectionName="payments"

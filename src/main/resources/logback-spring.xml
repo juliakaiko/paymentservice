@@ -28,7 +28,7 @@
                 <!-- MDC поля -->
                 <mdc>
                     <!-- Если указать keys, пишем их через <includeMdcKeyName> -->
-                    <includeMdcKeyName>requestId</includeMdcKeyName>
+                    <includeMdcKeyName>traceId</includeMdcKeyName>
                     <includeMdcKeyName>serviceName</includeMdcKeyName>
                     <includeMdcKeyName>path</includeMdcKeyName>
                     <includeMdcKeyName>query</includeMdcKeyName>

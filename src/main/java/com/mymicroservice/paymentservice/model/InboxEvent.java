@@ -26,7 +26,7 @@ import java.util.UUID;
 public class InboxEvent {
 
     @Id
-    private UUID eventId;
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private UUID idempotenceId;
@@ -35,10 +35,13 @@ public class InboxEvent {
     @Column(columnDefinition = "jsonb")
     private String payload;
     private String sourceService;
-    private String requestId;
+    private String traceId;
 
     @Enumerated(EnumType.STRING)
     private InboxEventStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
+
+    @Column(nullable = false)
+    private int retryCount;
 }

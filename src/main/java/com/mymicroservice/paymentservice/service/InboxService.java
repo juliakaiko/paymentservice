@@ -1,15 +1,15 @@
 package com.mymicroservice.paymentservice.service;
 
 import com.mymicroservice.paymentservice.model.InboxEvent;
-import com.mymicroservice.paymentservice.model.enums.InboxEventStatus;
-import org.mymicroservices.common.events.OrderEventDto;
 
 import java.util.UUID;
 
 public interface InboxService {
 
-    void process(InboxEvent inboxEvent, OrderEventDto event, String idempotenceId);
+    void saveInboxEvent(InboxEvent event);
 
-    void updateStatus(InboxEventStatus status, String idempotenceId);
+    void saveUnprocessableEvent(UUID idempotenceId, String eventType, String traceId,
+                                String sourceService, String errorMessage);
 
+    void processPendingInboxEvents();
 }

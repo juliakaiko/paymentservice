@@ -2,21 +2,18 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
-            http://www.liquibase.org/xml/ns/pro
-            http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <changeSet id="01-create-inbox-table" author="julia_kaiko">
         <createIndex tableName="inbox_table"
                      indexName="idx_inbox_event_id">
-            <column name="idempotence_id"/>
+            <column name="id"/>
         </createIndex>
 
         <createIndex tableName="inbox_table"
-                     indexName="idx_inbox_request_id">
-            <column name="request_id"/>
+                     indexName="idx_inbox_trace_id">
+            <column name="trace_id"/>
         </createIndex>
     </changeSet>
 

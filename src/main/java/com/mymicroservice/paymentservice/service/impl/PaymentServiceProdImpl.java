@@ -17,6 +17,7 @@ import org.mymicroservices.common.events.PaymentEventDto;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,14 +26,15 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@Profile({"dev", "default"})
+@Profile({"prod"})
 @RequiredArgsConstructor
-public class PaymentServiceImpl implements PaymentService {
+public class PaymentServiceProdImpl implements PaymentService {
 
     private final PaymentEventProducer paymentEventProducer;
     private final PaymentRepository paymentRepository;
     private final RandomNumberClient randomNumberClient;
 
+    @Transactional
     @Override
     public PaymentEventDto createPayment(EventEnvelope<OrderEventDto> eventEnvelope) {
         return paymentRepository.findFirstByOrderId(eventEnvelope.payload().getOrderId())
@@ -44,6 +46,19 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseGet(() -> saveNewPayment(eventEnvelope));
     }
 
+    /**
+     * Защита от повторного создания платежа при повторной обработке Inbox-события.
+     *
+     * Возможен сценарий, когда платеж был успешно сохранён в MongoDB,
+     * но последующий шаг обработки (например, отправка события в Kafka)
+     * завершился ошибкой. В этом случае Inbox-событие получает статус FAILED
+     * и будет обработано повторно.
+     *
+     * При повторной обработке попытка создания платежа может привести к
+     * нарушению уникального ограничения по orderId. Вместо ошибки
+     * возвращается уже существующий платеж, что обеспечивает идемпотентность
+     * обработки.
+     */
     private PaymentEventDto saveNewPayment (EventEnvelope<OrderEventDto> eventEnvelope) {
         Payment entity = OrderEventMapper.INSTANCE.toEntity(eventEnvelope.payload());
         int random = randomNumberClient.generateRandNum();
@@ -70,6 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentEventDto getPaymentById(String id) {
         Payment entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -78,6 +94,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentEventDto updatePayment(String id, OrderEventDto dtoDetails) {
         Payment entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -92,6 +109,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentEventDto deletePaymentById(String id) {
         Payment entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment wasn't found with id " + id));
@@ -101,6 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public List<PaymentEventDto> getPaymentsByOrderId(String orderId) {
         log.info("getPaymentsByOrderId(): {}", orderId);
         List<Payment> payments = paymentRepository.findByOrderId(orderId);
@@ -108,6 +127,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public List<PaymentEventDto> getPaymentsByUserId(String userId) {
         log.info("getPaymentsByUserId(): {}", userId);
         List<Payment> payments = paymentRepository.findByUserId(userId);
@@ -115,6 +135,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public List<PaymentEventDto> getPaymentsByStatuses(List<String> statuses) {
         log.info("getPaymentsByStatuses(): {}", statuses);
         List<Payment> payments = paymentRepository.findByStatusIn(statuses);
@@ -122,6 +143,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public BigDecimal getTotalSumForPeriod(LocalDateTime start, LocalDateTime end) {
         log.info("getTotalSumForPeriod(): {} - {}", start, end);
         List<Payment> payments = paymentRepository.findByTimestampBetween(start, end);

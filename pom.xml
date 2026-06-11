@@ -28,7 +28,7 @@
         <spring-webflux.version>6.1.13</spring-webflux.version>
         <uuid-creator.version>5.3.0</uuid-creator.version>
         <common-events.version>1.0.0</common-events.version>
-        <common-filters-starter.version>1.0.0</common-filters-starter.version>
+        <common-filters-starter.version>1.0.1</common-filters-starter.version>
 		<sonar.organization>juliakaiko</sonar.organization>
 		<sonar.projectKey>juliakaiko_paymentservice</sonar.projectKey>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>

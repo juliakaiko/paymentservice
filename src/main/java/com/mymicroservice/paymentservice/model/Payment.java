@@ -1,11 +1,11 @@
 package com.mymicroservice.paymentservice.model;
 
-import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
-import org.springframework.data.annotation.Id;
+import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentEntity {
+public class Payment {
 
     @Id
     private String id;
@@ -28,7 +28,7 @@ public class PaymentEntity {
     @Field("user_id")
     private String userId;
 
-    private PaimentStatus status;
+    private PaymentStatus status;
 
     private LocalDateTime timestamp;
 

@@ -37,11 +37,11 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
-
+/*
         if (publicEndpoints.stream().anyMatch(path::startsWith)) {
             filterChain.doFilter(request, response);
             return;
-        }
+        }*/
 
         try {
             if (isGatewayCall(request)) {

@@ -1,5 +1,6 @@
 package com.mymicroservice.paymentservice.service;
 
+import com.mymicroservice.paymentservice.kafka.EventEnvelope;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface PaymentService {
 
-    PaymentEventDto createPayment(OrderEventDto dto);
+    PaymentEventDto createPayment(EventEnvelope<OrderEventDto> eventEnvelope);
 
     PaymentEventDto getPaymentById(String id);
 

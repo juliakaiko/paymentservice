@@ -5,17 +5,18 @@ import com.mymicroservice.paymentservice.util.PaymentRequestDtoGenerator;
 import org.junit.jupiter.api.Test;
 import org.mymicroservices.common.events.OrderEventDto;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PaymentRequestMapperTest {
+class PaymentRequestMapperTest {
 
     @Test
-    public void testPaymentRequestDtoToOrderEventDto_whenOk_thenMapFieldsCorrectly() {
+    void toOrderEventDto_ShouldMapFieldsCorrectly_WhenPaymentRequestDtoProvided() {
         PaymentRequestDto paymentRequestDto = PaymentRequestDtoGenerator.generatePaymentRequestDto();
+
         OrderEventDto orderEventDto = PaymentRequestMapper.INSTANCE.toOrderEventDto(paymentRequestDto);
 
-        assertEquals(orderEventDto.getOrderId(), paymentRequestDto.getOrderId());
-        assertEquals(orderEventDto.getUserId(), paymentRequestDto.getUserId());
-        assertEquals(orderEventDto.getPaymentAmount(), paymentRequestDto.getPaymentAmount());
+        assertEquals(paymentRequestDto.getOrderId(), orderEventDto.getOrderId());
+        assertEquals(paymentRequestDto.getUserId(), orderEventDto.getUserId());
+        assertEquals(paymentRequestDto.getPaymentAmount(), orderEventDto.getPaymentAmount());
     }
 }

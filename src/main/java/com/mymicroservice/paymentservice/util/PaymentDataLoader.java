@@ -1,9 +1,10 @@
 package com.mymicroservice.paymentservice.util;
 
-import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
+import com.mymicroservice.paymentservice.model.Payment;
+import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -26,34 +27,35 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Profile("!test")
+@Slf4j
 public class PaymentDataLoader implements CommandLineRunner {
 
     private final PaymentRepository paymentRepository;
 
     @Override
     public void run(String... args) {
-        List<PaymentEntity> payments = List.of(
-                PaymentEntity.builder()
+        List<Payment> payments = List.of(
+                Payment.builder()
                         .id("payment-1")
                         .orderId("7")
                         .userId("1")
-                        .status(PaimentStatus.PAID)
+                        .status(PaymentStatus.PAID)
                         .timestamp(LocalDateTime.of(2025, 5, 18, 17, 10, 25))
                         .paymentAmount(BigDecimal.valueOf(500000, 2))
                         .build(),
-                PaymentEntity.builder()
+                Payment.builder()
                         .id("payment-2")
                         .orderId("2")
                         .userId("2")
-                        .status(PaimentStatus.FAILED)
+                        .status(PaymentStatus.FAILED)
                         .timestamp(LocalDateTime.of(2025, 9, 5, 11, 30, 1))
                         .paymentAmount(BigDecimal.valueOf(100000, 2))
                         .build(),
-                PaymentEntity.builder()
+                Payment.builder()
                         .id("payment-3")
                         .orderId("11")
                         .userId("1")
-                        .status(PaimentStatus.FAILED)
+                        .status(PaymentStatus.FAILED)
                         .timestamp(LocalDateTime.of(2025, 7, 22, 11, 30, 1))
                         .paymentAmount(BigDecimal.valueOf(100000, 2))
                         .build()
@@ -61,6 +63,6 @@ public class PaymentDataLoader implements CommandLineRunner {
 
         payments.forEach(paymentRepository::save);    // Upsert по _id — MongoRepository.save() automatically updates or inserts
 
-        System.out.println("Payment data loaded successfully!");
+        log.info("Test payment data loaded successfully");
     }
 }

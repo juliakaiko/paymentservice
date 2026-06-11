@@ -1,10 +1,9 @@
 package com.mymicroservice.paymentservice.repository;
 
 import com.mymicroservice.paymentservice.config.MongoTestcontainersConfig;
-import com.mymicroservice.paymentservice.model.PaymentEntity;
-import com.mymicroservice.paymentservice.model.enums.PaimentStatus;
+import com.mymicroservice.paymentservice.model.Payment;
+import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,17 +13,17 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 @DataMongoTest
-public class PaymentRepositoryTest extends MongoTestcontainersConfig {
+class PaymentRepositoryTest extends MongoTestcontainersConfig {
+
+    private static final String ENTITY_ID = "1";
 
     @Autowired
-    private  PaymentRepository paymentRepository;
+    private PaymentRepository paymentRepository;
 
-    private List<PaymentEntity> expectedPayments;
-    private final static String ENTITY_ID = "1";
+    private List<Payment> expectedPayments;
 
     @BeforeEach
     void init() {
@@ -32,53 +31,56 @@ public class PaymentRepositoryTest extends MongoTestcontainersConfig {
     }
 
     @AfterEach
-    void clean(){
+    void clean() {
         paymentRepository.deleteAll();
     }
 
     @Test
-    void testFindByOrderId() {
+    void findByOrderId_ShouldReturnPayments_WhenOrderExists() {
         var result = paymentRepository.findByOrderId(ENTITY_ID);
 
-        log.info("▶ Running test: testFindByOrderId(), OrderId={}", ENTITY_ID);
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(expectedPayments.get(0));
     }
 
     @Test
-    void testFindByUserId() {
+    void findFirstByOrderId_ShouldReturnPayment_WhenOrderExists() {
+        var result = paymentRepository.findFirstByOrderId(ENTITY_ID);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getOrderId()).isEqualTo(ENTITY_ID);
+    }
+
+    @Test
+    void findByUserId_ShouldReturnPayments_WhenUserExists() {
         var result = paymentRepository.findByUserId(ENTITY_ID);
 
-        log.info("▶ Running test: testFindByUserId(), UserId={}", ENTITY_ID);
         assertThat(result).hasSize(1);
         assertThat(result)
-                .extracting(PaymentEntity::getOrderId)
+                .extracting(Payment::getOrderId)
                 .containsExactlyInAnyOrder("1");
     }
 
     @Test
-    void testFindByStatusIn() {
+    void findByStatusIn_ShouldReturnPayments_WhenStatusesMatch() {
         var result = paymentRepository.findByStatusIn(List.of("PAID", "FAILED"));
 
-        log.info("▶ Running test: testFindByStatusIn()");
         assertThat(result).hasSize(2);
         assertThat(result)
-                .extracting(PaymentEntity::getStatus)
-                .containsExactlyInAnyOrder(PaimentStatus.FAILED, PaimentStatus.PAID);
+                .extracting(Payment::getStatus)
+                .containsExactlyInAnyOrder(PaymentStatus.FAILED, PaymentStatus.PAID);
     }
 
     @Test
-    void testFindByTimestampBetween() {
+    void findByTimestampBetween_ShouldReturnPayments_WhenTimestampInRange() {
         LocalDateTime start = LocalDateTime.of(2024, 1, 1, 1, 10, 1);
         LocalDateTime end = LocalDateTime.of(2025, 3, 3, 3, 30, 3);
 
         var result = paymentRepository.findByTimestampBetween(start, end);
-        log.info("▶ Running test: testFindByTimestampBetween()");
 
         assertThat(result).hasSize(2);
         assertThat(result)
-                .extracting(PaymentEntity::getOrderId)
+                .extracting(Payment::getOrderId)
                 .containsExactlyInAnyOrder("1", "2");
     }
-
 }

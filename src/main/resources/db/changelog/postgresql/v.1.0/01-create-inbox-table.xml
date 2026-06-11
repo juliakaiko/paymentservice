@@ -2,15 +2,12 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
-            http://www.liquibase.org/xml/ns/pro
-            http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <changeSet id="01-create-inbox-table" author="julia_kaiko">
         <createTable tableName="inbox_table">
-            <column name="event_id" type="UUID">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="idempotence_id" type="UUID">
@@ -19,7 +16,7 @@
             <column name="event_type" type="varchar(50)"/>
             <column name="payload" type="jsonb"/>
             <column name="source_service" type="varchar(100)"/>
-            <column name="request_id" type="varchar(100)"/>
+            <column name="trace_id" type="varchar(100)"/>
             <column name="status" type="varchar(20)">
                 <constraints nullable="false"/>
             </column>
@@ -27,6 +24,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="processed_at" type="timestamp"/>
+            <column name="retry_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 

@@ -1,5 +1,6 @@
 package com.mymicroservice.paymentservice.advice;
 
+import com.mymicroservice.paymentservice.exception.InboxEventNotFoundException;
 import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.util.ErrorItem;
 import jakarta.validation.ConstraintViolationException;
@@ -10,11 +11,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalAdvice {
@@ -98,7 +94,13 @@ public class GlobalAdvice {
 
     @ExceptionHandler({PaymentNotFoundException.class})
     public ResponseEntity<ErrorItem> handlePaymentNotFoundException(PaymentNotFoundException e) {
-        ErrorItem error = ErrorItem.generateMessage(e, HttpStatus.BAD_REQUEST);
+        ErrorItem error = ErrorItem.generateMessage(e, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(error.getStatusCode()).body(error);
+    }
+
+    @ExceptionHandler({InboxEventNotFoundException.class})
+    public ResponseEntity<ErrorItem> handleOutboxEventNotFoundException(InboxEventNotFoundException e) {
+        ErrorItem error = ErrorItem.generateMessage(e, HttpStatus.NOT_FOUND);
         return ResponseEntity.status(error.getStatusCode()).body(error);
     }
 }
