@@ -102,8 +102,16 @@ jobs:
           password: ${{ secrets.TOKEN_FOR_PAYMENTSERVICE }}
 
       # 11. Build and push Docker image (production)
+      #- name: Build and Push Docker Image
+        #if: success()
+       #run: |
+          #docker build -t juliakaiko94/paymentservice:latest .
+          #docker push juliakaiko94/paymentservice:latest
       - name: Build and Push Docker Image
         if: success()
         run: |
-          docker build -t juliakaiko94/paymentservice:latest .
+          docker build \
+            --build-arg GITHUB_USERNAME=${{ github.actor }} \
+            --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -t juliakaiko94/paymentservice:latest .
           docker push juliakaiko94/paymentservice:latest
