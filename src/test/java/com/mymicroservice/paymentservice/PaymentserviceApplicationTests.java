@@ -1,6 +1,6 @@
 package com.mymicroservice.paymentservice;
 
-import com.mymicroservice.paymentservice.config.MongoTestcontainersConfig;
+import com.mymicroservice.paymentservice.configuration.MongoTestcontainersConfig;
 import com.mymicroservice.paymentservice.kafka.PaymentEventProducer;
 import com.mymicroservice.paymentservice.kafka.inbox.InboxEventConsumer;
 import com.mymicroservice.paymentservice.metrics.InboxMetrics;

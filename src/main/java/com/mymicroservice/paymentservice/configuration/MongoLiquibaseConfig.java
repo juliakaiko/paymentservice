@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.config;
+package com.mymicroservice.paymentservice.configuration;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;

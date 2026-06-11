@@ -1,5 +1,6 @@
-package com.mymicroservice.paymentservice.mapper;
+package com.mymicroservice.paymentservice.unit.mapper;
 
+import com.mymicroservice.paymentservice.mapper.PaymentResponseMapper;
 import com.mymicroservice.paymentservice.model.Payment;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
 import org.junit.jupiter.api.Test;

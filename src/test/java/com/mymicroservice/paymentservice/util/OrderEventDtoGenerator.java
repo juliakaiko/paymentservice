@@ -4,14 +4,16 @@ import org.mymicroservices.common.events.OrderEventDto;
 
 import java.math.BigDecimal;
 
+import static com.mymicroservice.paymentservice.util.data.TestConstants.ENTITY_ID;
+
 public class OrderEventDtoGenerator {
 
     public static OrderEventDto generateOrderEventDto() {
-        return generateOrderEventDto("1", "1", BigDecimal.valueOf(1000.00));
+        return generateOrderEventDto(ENTITY_ID, ENTITY_ID, BigDecimal.valueOf(1000.00));
     }
 
     public static OrderEventDto generateOrderEventDto(String orderId) {
-        return generateOrderEventDto(orderId, "1", BigDecimal.valueOf(1000.00));
+        return generateOrderEventDto(orderId, ENTITY_ID, BigDecimal.valueOf(1000.00));
     }
 
     public static OrderEventDto generateOrderEventDto(String orderId, String userId, BigDecimal amount) {

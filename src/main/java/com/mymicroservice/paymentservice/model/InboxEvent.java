@@ -1,6 +1,7 @@
 package com.mymicroservice.paymentservice.model;
 
 import com.mymicroservice.paymentservice.model.enums.InboxEventStatus;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +13,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,6 +35,7 @@ public class InboxEvent {
     private String eventType;
 
     @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType.class)
     private String payload;
     private String sourceService;
     private String traceId;

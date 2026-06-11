@@ -1,6 +1,7 @@
-package com.mymicroservice.paymentservice.controller;
+package com.mymicroservice.paymentservice.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mymicroservice.paymentservice.controller.PaymentController;
 import com.mymicroservice.paymentservice.dto.PaymentRequestDto;
 import com.mymicroservice.paymentservice.mapper.PaymentRequestMapper;
 import com.mymicroservice.paymentservice.mapper.PaymentResponseMapper;
@@ -75,21 +76,6 @@ public class PaymentControllerTest {
         paymentRequestDto = PaymentRequestDtoGenerator.generatePaymentRequestDto();
         orderEventDto = PaymentRequestMapper.INSTANCE.toOrderEventDto(paymentRequestDto);
     }
-
-    /*@Test
-    public void createPayment_ShouldReturnCreatedPaymentEventDto() throws Exception {
-        log.info("▶ Running test: createPayment_ShouldReturnCreatedPaymentEventDto(), OrdertEvent={}", orderEventDto);
-
-        when(paymentService.createPayment(any(OrderEventDto.class))).thenReturn(paymentEventDto);
-
-        mockMvc.perform(post("/api/payments/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(paymentEventDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(PAYMENT_ID));
-
-        verify(paymentService).createPayment(any(OrderEventDto.class));
-    }*/
 
     @Test
     public void getPaymentById_ShouldReturnPaymentEventDto() throws Exception {

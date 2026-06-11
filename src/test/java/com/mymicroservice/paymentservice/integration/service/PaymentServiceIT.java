@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.service;
+package com.mymicroservice.paymentservice.integration.service;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.mymicroservice.paymentservice.kafka.EventEnvelope;
@@ -43,6 +43,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.ENTITY_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -105,8 +106,8 @@ class PaymentServiceIT {
         PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         assertNotNull(dto.getId());
-        assertEquals("1", dto.getOrderId());
-        assertEquals("1", dto.getUserId());
+        assertEquals(ENTITY_ID, dto.getOrderId());
+        assertEquals(ENTITY_ID, dto.getUserId());
         assertEquals(PaymentStatus.PAID.name(), dto.getStatus());
 
         Payment saved = paymentRepository.findById(dto.getId()).orElseThrow();
@@ -124,7 +125,7 @@ class PaymentServiceIT {
         PaymentEventDto second = paymentService.createPayment(eventEnvelope);
 
         assertEquals(first.getId(), second.getId());
-        assertThat(paymentRepository.findByOrderId("1")).hasSize(1);
+        assertThat(paymentRepository.findByOrderId(ENTITY_ID)).hasSize(1);
     }
 
     @Test
@@ -132,7 +133,7 @@ class PaymentServiceIT {
         PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
         assertThat(dto).isNotNull();
-        assertThat(paymentRepository.findByOrderId("1")).hasSize(1);
+        assertThat(paymentRepository.findByOrderId(ENTITY_ID)).hasSize(1);
 
         Map<String, Object> consumerProps = Map.of(
                 "bootstrap.servers", kafka.getBootstrapServers(),

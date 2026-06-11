@@ -1,6 +1,7 @@
-package com.mymicroservice.paymentservice.mapper;
+package com.mymicroservice.paymentservice.unit.mapper;
 
 import com.mymicroservice.paymentservice.dto.PaymentRequestDto;
+import com.mymicroservice.paymentservice.mapper.PaymentRequestMapper;
 import com.mymicroservice.paymentservice.util.PaymentRequestDtoGenerator;
 import org.junit.jupiter.api.Test;
 import org.mymicroservices.common.events.OrderEventDto;

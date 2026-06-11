@@ -13,7 +13,13 @@ COPY maven-settings.xml /root/.m2/settings.xml
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+RUN echo "========================="
+RUN echo "GITHUB_USERNAME=$GITHUB_USERNAME"
+RUN echo "TOKEN_LENGTH=${#GITHUB_TOKEN}"
+RUN echo "========================="
+RUN cat /root/.m2/settings.xml
+
+RUN mvn -X clean package -DskipTests
 
 # ---------- RUNTIME ----------
 FROM eclipse-temurin:21-jre
@@ -25,6 +31,31 @@ COPY --from=build /build/target/*.jar app.jar
 EXPOSE 8084
 
 ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+
+
+# ---------- BUILD ----------
+#FROM maven:3.9.6-eclipse-temurin-21 AS build
+
+#ARG GITHUB_TOKEN
+#ARG GITHUB_USERNAME
+
+#ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+#ENV GITHUB_USERNAME=${GITHUB_USERNAME}
+
+#WORKDIR /build
+
+#COPY maven-settings.xml /root/.m2/settings.xml
+#COPY pom.xml .
+#COPY src ./src
+
+#RUN mvn clean package -DskipTests
+
+# ---------- RUNTIME ----------
+#FROM eclipse-temurin:21-jre
+#WORKDIR /app
+#COPY --from=build /build/target/*.jar app.jar
+#EXPOSE 8084
+#ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
 
 
 #FROM eclipse-temurin:21-jre

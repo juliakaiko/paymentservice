@@ -1,8 +1,9 @@
-package com.mymicroservice.paymentservice.repository;
+package com.mymicroservice.paymentservice.integration.repository;
 
-import com.mymicroservice.paymentservice.config.MongoTestcontainersConfig;
+import com.mymicroservice.paymentservice.configuration.MongoTestcontainersConfig;
 import com.mymicroservice.paymentservice.model.Payment;
 import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
+import com.mymicroservice.paymentservice.repository.PaymentRepository;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +14,14 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.mymicroservice.paymentservice.util.data.TestConstants.ENTITY_ID;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.FAILED_STATUS;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.PAID_STATUS;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.SECOND_ENTITY_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
 class PaymentRepositoryTest extends MongoTestcontainersConfig {
-
-    private static final String ENTITY_ID = "1";
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -63,7 +66,7 @@ class PaymentRepositoryTest extends MongoTestcontainersConfig {
 
     @Test
     void findByStatusIn_ShouldReturnPayments_WhenStatusesMatch() {
-        var result = paymentRepository.findByStatusIn(List.of("PAID", "FAILED"));
+        var result = paymentRepository.findByStatusIn(List.of(PAID_STATUS, FAILED_STATUS));
 
         assertThat(result).hasSize(2);
         assertThat(result)
@@ -81,6 +84,6 @@ class PaymentRepositoryTest extends MongoTestcontainersConfig {
         assertThat(result).hasSize(2);
         assertThat(result)
                 .extracting(Payment::getOrderId)
-                .containsExactlyInAnyOrder("1", "2");
+                .containsExactlyInAnyOrder(ENTITY_ID, SECOND_ENTITY_ID);
     }
 }

@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.config;
+package com.mymicroservice.paymentservice.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

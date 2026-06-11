@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.config;
+package com.mymicroservice.paymentservice.configuration;
 
 import com.mymicroservice.paymentservice.filter.GatewayAuthFilter;
 import com.mymicroservice.paymentservice.security.CustomAccessDeniedHandler;

@@ -46,7 +46,7 @@ public class InboxServiceImpl implements InboxService {
     public void saveInboxEvent(InboxEvent event) {
         int inserted = insertEvent(event);
         if (inserted == 0) {
-            log.info("Duplicate inbox event ignored. id={}", event.getIdempotenceId());
+            log.warn("Duplicate inbox event ignored. id={}", event.getIdempotenceId());
         }
     }
 
@@ -71,7 +71,7 @@ public class InboxServiceImpl implements InboxService {
 
         int inserted = insertEvent(poisonEvent);
         if (inserted == 0) {
-            log.info("Unprocessable inbox event already exists. id={}", idempotenceId);
+            log.warn("Unprocessable inbox event already exists. id={}", idempotenceId);
             return;
         }
 

@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.service;
+package com.mymicroservice.paymentservice.unit.service;
 
 import com.mymicroservice.paymentservice.alert.InboxDeadLetterAlert;
 import com.mymicroservice.paymentservice.kafka.EventEnvelope;
@@ -7,6 +7,7 @@ import com.mymicroservice.paymentservice.metrics.InboxMetrics;
 import com.mymicroservice.paymentservice.model.InboxEvent;
 import com.mymicroservice.paymentservice.model.enums.InboxEventStatus;
 import com.mymicroservice.paymentservice.repository.InboxEventRepository;
+import com.mymicroservice.paymentservice.service.PaymentService;
 import com.mymicroservice.paymentservice.service.impl.InboxServiceImpl;
 import com.mymicroservice.paymentservice.util.InboxEventGenerator;
 import com.mymicroservice.paymentservice.util.OrderEventDtoGenerator;

@@ -7,6 +7,10 @@ import com.mymicroservice.paymentservice.model.enums.InboxEventStatus;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.mymicroservice.paymentservice.util.data.TestConstants.CREATE_ORDER_EVENT_TYPE;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.SOURCE_SERVICE;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.TRACE_ID;
+
 public class InboxEventGenerator {
 
     public static final String DEFAULT_PAYLOAD =
@@ -25,10 +29,10 @@ public class InboxEventGenerator {
         return InboxEvent.builder()
                 .id(UuidCreator.getTimeOrderedEpoch())
                 .idempotenceId(idempotenceId)
-                .eventType("CREATE_ORDER")
+                .eventType(CREATE_ORDER_EVENT_TYPE)
                 .payload(payload)
-                .sourceService("orderservice")
-                .traceId("test-trace-id")
+                .sourceService(SOURCE_SERVICE)
+                .traceId(TRACE_ID)
                 .status(status)
                 .createdAt(LocalDateTime.now())
                 .processedAt(null)

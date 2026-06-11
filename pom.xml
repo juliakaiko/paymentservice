@@ -25,6 +25,8 @@
         <postgresql.version>42.7.4</postgresql.version>
         <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <hypersistence-utils.version>3.7.7</hypersistence-utils.version>
+        <org.testcontainers.version>1.19.8</org.testcontainers.version>
         <spring-webflux.version>6.1.13</spring-webflux.version>
         <uuid-creator.version>5.3.0</uuid-creator.version>
         <common-events.version>1.0.0</common-events.version>
@@ -128,6 +130,11 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc-openapi.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>${hypersistence-utils.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -171,6 +178,32 @@
             <version>${spring-cloud-contract-wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
+
+        <!-- Testcontainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${org.testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${org.testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${org.testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webflux</artifactId>

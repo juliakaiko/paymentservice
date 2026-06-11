@@ -1,4 +1,4 @@
-package com.mymicroservice.paymentservice.service;
+package com.mymicroservice.paymentservice.unit.service;
 
 import com.mymicroservice.paymentservice.exception.PaymentNotFoundException;
 import com.mymicroservice.paymentservice.kafka.EventEnvelope;
@@ -25,7 +25,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mymicroservice.paymentservice.util.TestConstants.PAYMENT_ID;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.ENTITY_ID;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.PAYMENT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,7 +63,7 @@ class PaymentServiceImplTest {
 
     @Test
     void createPayment_ShouldReturnPaymentEventDto_WhenPaymentDoesNotExist() {
-        when(paymentRepository.findFirstByOrderId("1")).thenReturn(Optional.empty());
+        when(paymentRepository.findFirstByOrderId(ENTITY_ID)).thenReturn(Optional.empty());
         when(randomNumberClient.generateRandNum()).thenReturn(42);
         when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -76,7 +77,7 @@ class PaymentServiceImplTest {
     @Test
     void createPayment_ShouldReturnExistingPayment_WhenOrderAlreadyHasPayment() {
         Payment existing = expectedPayments.get(0);
-        when(paymentRepository.findFirstByOrderId("1")).thenReturn(Optional.of(existing));
+        when(paymentRepository.findFirstByOrderId(ENTITY_ID)).thenReturn(Optional.of(existing));
 
         PaymentEventDto result = paymentService.createPayment(eventEnvelope);
 
@@ -147,9 +148,9 @@ class PaymentServiceImplTest {
 
     @Test
     void getPaymentsByOrderId_ShouldReturnList_WhenPaymentsExist() {
-        when(paymentRepository.findByOrderId("1")).thenReturn(expectedPayments);
+        when(paymentRepository.findByOrderId(ENTITY_ID)).thenReturn(expectedPayments);
 
-        List<PaymentEventDto> result = paymentService.getPaymentsByOrderId("1");
+        List<PaymentEventDto> result = paymentService.getPaymentsByOrderId(ENTITY_ID);
 
         assertEquals(expectedPayments.size(), result.size());
         assertEquals(expectedPayments.get(0).getOrderId(), result.get(0).getOrderId());
@@ -157,9 +158,9 @@ class PaymentServiceImplTest {
 
     @Test
     void getPaymentsByUserId_ShouldReturnList_WhenPaymentsExist() {
-        when(paymentRepository.findByUserId("1")).thenReturn(expectedPayments);
+        when(paymentRepository.findByUserId(ENTITY_ID)).thenReturn(expectedPayments);
 
-        List<PaymentEventDto> result = paymentService.getPaymentsByUserId("1");
+        List<PaymentEventDto> result = paymentService.getPaymentsByUserId(ENTITY_ID);
 
         assertEquals(expectedPayments.size(), result.size());
         assertEquals(expectedPayments.get(0).getUserId(), result.get(0).getUserId());
