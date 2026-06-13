@@ -66,6 +66,29 @@ class InboxServiceImplTest {
     }
 
     @Test
+    void saveInboxEvent_ShouldInsertEvent_WhenEventIsNew() {
+        InboxEvent event = InboxEventGenerator.generateReceivedInboxEvent();
+        when(inboxRepository.insertIgnoreDuplicate(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), anyInt()
+        )).thenReturn(1);
+
+        inboxService.saveInboxEvent(event);
+
+        verify(inboxRepository).insertIgnoreDuplicate(
+                eq(event.getId()),
+                eq(event.getIdempotenceId()),
+                eq(event.getEventType()),
+                eq(event.getPayload()),
+                eq(event.getSourceService()),
+                eq(event.getTraceId()),
+                eq(event.getStatus().name()),
+                eq(event.getCreatedAt()),
+                eq(event.getProcessedAt()),
+                eq(event.getRetryCount())
+        );
+    }
+
+    @Test
     void saveInboxEvent_ShouldIgnoreDuplicate_WhenEventAlreadyExists() {
         InboxEvent event = InboxEventGenerator.generateReceivedInboxEvent();
         when(inboxRepository.insertIgnoreDuplicate(

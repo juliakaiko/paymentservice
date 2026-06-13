@@ -82,17 +82,20 @@ jobs:
 
       # 9. Static code analysis with SonarCloud
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        run: |
+          mvn -B clean verify sonar:sonar \
+            -Dsonar.projectKey=juliakaiko_userservice \
+            -Dsonar.projectName=UserService \
+            -Dsonar.organization=juliakaiko \
+            -Dsonar.sources=src/main/java \
+            -Dsonar.tests=src/test/java \
+            -Dsonar.java.binaries=target/classes,target/generated-sources/annotations \
+            -Dsonar.java.test.binaries=target/test-classes \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.sourceEncoding=UTF-8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-        with:
-          args: >
-            -Dsonar.projectKey=juliakaiko_paymentservice
-            -Dsonar.projectName=paymentservice
-            -Dsonar.organization=juliakaiko
-            -Dsonar.java.binaries=target/classes
-            -Dsonar.java.libraries=target/unpacked-libs/*.jar
 
       # 10. Login to Docker Hub
       - name: Login to Docker Hub
@@ -102,11 +105,6 @@ jobs:
           password: ${{ secrets.TOKEN_FOR_PAYMENTSERVICE }}
 
       # 11. Build and push Docker image (production)
-      #- name: Build and Push Docker Image
-        #if: success()
-       #run: |
-          #docker build -t juliakaiko94/paymentservice:latest .
-          #docker push juliakaiko94/paymentservice:latest
       - name: Build and Push Docker Image
         if: success()
         run: |

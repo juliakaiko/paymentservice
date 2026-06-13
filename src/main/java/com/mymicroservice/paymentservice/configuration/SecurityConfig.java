@@ -24,14 +24,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(gatewayAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(gatewayAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers(
                                 "/actuator/**",
                                 "/actuator",
+                                "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/swagger-resources/*",
+                                "/swagger-resources/**",
                                 "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )

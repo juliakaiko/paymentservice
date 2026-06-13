@@ -160,7 +160,9 @@ REST-запросы обрабатывает `PaymentController` → `PaymentSer
 
 > Создание платежей происходит только через Kafka Inbox.
 
-Swagger UI: `http://localhost:8084/swagger-ui.html`
+**Swagger UI (агрегированный, через Gateway):** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+**Swagger UI (напрямую, paymentservice):** [http://localhost:8084/swagger-ui.html](http://localhost:8084/swagger-ui.html)
 
 ---
 
@@ -281,7 +283,8 @@ FAILED   → DEAD          (retry_count >= 10)
 |---------|------|------------|
 | `dev` | `application-dev.properties` | Локальная разработка |
 | `prod` | `application-prod.properties` | Production (Docker) |
-| `test` | `application-test.properties` (test scope) | Unit/Integration тесты |
+| `test` | `application-test.properties` (test scope) | Unit-тесты, @WebMvcTest, @DataMongoTest |
+| `testcontainer` | `application-testcontainer.properties` (test scope) | Integration-тесты с Testcontainers + @EmbeddedKafka |
 
 ### Реализации PaymentService
 
@@ -334,17 +337,64 @@ docker run -p 8084:8084 paymentservice
 mvn test
 ```
 
+> Для integration-тестов (`*IT.java`) с `@EmbeddedKafka` и Testcontainers требуется **Docker**. Без Docker классы с `@Testcontainers(disabledWithoutDocker = true)` пропускаются.
+
+### Структура тестов
+
+```
+src/test/java/com/mymicroservice/paymentservice/
+├── unit/                          # Быстрые изолированные тесты (Mockito)
+│   ├── controller/
+│   ├── kafka/
+│   ├── mapper/
+│   ├── scheduler/
+│   └── service/
+├── integration/                   # Интеграционные тесты
+│   ├── controller/
+│   ├── kafka/                     # @EmbeddedKafka + Testcontainers
+│   ├── repository/
+│   └── service/
+├── configuration/                 # Базовые классы Testcontainers
+└── util/                          # Генераторы тестовых данных
+```
+
 ### Типы тестов
 
-| Класс | Тип | Инфраструктура |
-|-------|-----|----------------|
-| `PaymentServiceImplTest` | Unit (Mockito) | Моки репозитория и клиентов |
-| `InboxServiceImplTest` | Unit (Mockito) | Моки inbox, payment, metrics |
-| `PaymentControllerTest` | Web (@WebMvcTest) | MockMvc + mock PaymentService |
-| `PaymentRepositoryTest` | Data (@DataMongoTest) | Testcontainers MongoDB |
-| `PaymentServiceIT` | Integration (@SpringBootTest) | Testcontainers Kafka + MongoDB + WireMock |
-| `*MapperTest` | Unit | MapStruct маппинг |
-| `PaymentserviceApplicationTests` | Smoke | Testcontainers MongoDB |
+| Класс | Тип | Инфраструктура | Сценарии |
+|-------|-----|----------------|----------|
+| `PaymentServiceImplTest` | Unit | Mockito | CRUD, идемпотентность `createPayment` |
+| `InboxServiceImplTest` | Unit | Mockito | dedup, PROCESSED, retry, DEAD, poison |
+| `InboxEventConsumerTest` | Unit | Mockito | ack/nack, RECEIVED, poison → DEAD |
+| `PaymentEventProducerTest` | Unit | Mockito | заголовки Kafka, вызов `KafkaTemplate`, ошибка send |
+| `InboxSchedulerTest` | Unit | Mockito | делегирование в `InboxService` |
+| `PaymentControllerUnitTest` | Web | @WebMvcTest + MockMvc | REST-эндпоинты |
+| `*MapperTest` | Unit | MapStruct | маппинг DTO ↔ Entity |
+| `PaymentRepositoryTest` | Data | @DataMongoTest + Testcontainers MongoDB | MongoDB-запросы |
+| `InboxEventRepositoryTest` | Data | @DataJpaTest + Testcontainers PostgreSQL | inbox SQL, dedup, SKIP LOCKED |
+| `PaymentServiceIT` | Integration | @EmbeddedKafka + MongoDB + WireMock | PaymentService + Kafka producer |
+| `InboxEventConsumerIT` | Integration | @EmbeddedKafka + PostgreSQL + MongoDB | consumer → inbox RECEIVED, dedup |
+| `PaymentEventProducerIT` | Integration | @EmbeddedKafka + PostgreSQL + MongoDB | producer → Kafka + заголовки |
+| `InboxFlowIT` | Integration | @EmbeddedKafka + PG + Mongo + WireMock | полный flow, retry FAILED, DEAD после 10 попыток |
+| `PaymentControllerTest` | Integration | @WebMvcTest + MockMvc | REST с мок-сервисом |
+| `PaymentserviceApplicationTests` | Smoke | Testcontainers MongoDB | загрузка Spring-контекста |
+
+### Kafka-тесты (`spring-kafka-test`)
+
+Для классов, работающих с Kafka, используется **`@EmbeddedKafka`** (in-memory брокер) вместо внешнего Docker Kafka:
+
+```java
+@EmbeddedKafka(partitions = 1, topics = {CREATE_ORDER_TOPIC})
+class InboxEventConsumerIT extends AbstractKafkaIntegrationTest { ... }
+```
+
+| Тест | Что проверяет |
+|------|---------------|
+| `InboxEventConsumerIT` | `InboxEventConsumer` сохраняет RECEIVED, игнорирует дубликат |
+| `PaymentEventProducerIT` | `PaymentEventProducer` публикует в `create-payment` с `X-Idempotence-Id` |
+| `InboxFlowIT` | Kafka → inbox → payment → Kafka; retry при невалидном payload; DEAD |
+| `PaymentServiceIT` | `PaymentServiceImpl` отправляет `CREATE_PAYMENT` через producer |
+
+Отправка тестовых сообщений с заголовками — через утилиту `KafkaTestMessageSender`.
 
 ### Генераторы тестовых данных
 
@@ -358,6 +408,8 @@ mvn test
 | `PaymentEventDtoGenerator` | `PaymentEventDto` |
 | `EventEnvelopeGenerator` | `EventEnvelope<OrderEventDto>` / `EventEnvelope<PaymentEventDto>` |
 | `InboxEventGenerator` | `InboxEvent` (RECEIVED, FAILED) |
+| `KafkaTestMessageSender` | отправка `OrderEventDto` в Kafka с idempotence-заголовками |
+| `TestConstants` | общие константы (топики, UUID, traceId) |
 
 ### Стиль именования тестов
 
@@ -365,7 +417,39 @@ mvn test
 <имяМетода>_Should<Ожидание>_When<Условие>
 ```
 
-Пример: `createPayment_ShouldReturnExistingPayment_WhenOrderAlreadyHasPayment`
+Примеры:
+- `createPayment_ShouldReturnExistingPayment_WhenOrderAlreadyHasPayment`
+- `onCreateOrder_ShouldIgnoreDuplicate_WhenSameIdempotenceIdSentTwice`
+- `processPendingInboxEvents_ShouldCreatePaymentAndPublishEvent_WhenInboxHasReceivedEvent`
+- `onCreateOrder_ShouldSaveUnprocessableAndAck_WhenSerializationFails`
+
+---
+
+## Структура проекта
+
+```
+paymentservice/
+├── src/main/java/.../paymentservice/
+│   ├── controller/          # REST API
+│   ├── kafka/
+│   │   ├── inbox/           # InboxEventConsumer
+│   │   └── PaymentEventProducer, EventEnvelope
+│   ├── scheduler/           # InboxScheduler
+│   ├── service/impl/        # PaymentServiceImpl, InboxServiceImpl
+│   ├── repository/          # JPA + MongoDB
+│   ├── metrics/             # InboxMetrics
+│   └── configuration/       # Kafka, Liquibase, Security
+├── src/main/resources/
+│   ├── application.properties
+│   ├── application-dev.properties
+│   ├── application-prod.properties
+│   └── db/changelog/        # PostgreSQL + MongoDB миграции
+└── src/test/java/.../paymentservice/
+    ├── unit/                  # Mockito, @WebMvcTest
+    ├── integration/           # @EmbeddedKafka, Testcontainers
+    ├── configuration/         # AbstractContainerTest, AbstractKafkaIntegrationTest
+    └── util/                  # генераторы и KafkaTestMessageSender
+```
 
 ---
 

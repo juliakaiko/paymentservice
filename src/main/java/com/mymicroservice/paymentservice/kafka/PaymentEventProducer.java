@@ -10,7 +10,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import static com.mymicroservice.paymentservice.util.KafkaHeadersConstants.CREATE_PAYMENT_EVENT;
+import static com.mymicroservice.paymentservice.util.CommonConstants.CREATE_PAYMENT_EVENT;
 
 @Service
 @RequiredArgsConstructor

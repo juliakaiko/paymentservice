@@ -1,6 +1,8 @@
 package com.mymicroservice.paymentservice.integration.service;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.mymicroservice.paymentservice.configuration.LiquibaseTestOverride;
+import com.mymicroservice.paymentservice.configuration.MongoTestcontainersConfig;
 import com.mymicroservice.paymentservice.kafka.EventEnvelope;
 import com.mymicroservice.paymentservice.model.Payment;
 import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
@@ -17,20 +19,24 @@ import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import com.mymicroservice.paymentservice.kafka.inbox.InboxEventConsumer;
+import com.mymicroservice.paymentservice.metrics.InboxMetrics;
+import com.mymicroservice.paymentservice.scheduler.InboxScheduler;
+import com.mymicroservice.paymentservice.service.impl.InboxServiceImpl;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -43,6 +49,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.mymicroservice.paymentservice.util.data.TestConstants.CREATE_PAYMENT_TOPIC;
 import static com.mymicroservice.paymentservice.util.data.TestConstants.ENTITY_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,19 +59,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(properties = {
         "spring.autoconfigure.exclude="
                 + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+                + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration",
+        "spring.task.scheduling.enabled=false"
 })
-@Testcontainers
+@EmbeddedKafka(partitions = 1, topics = {CREATE_PAYMENT_TOPIC})
 @DirtiesContext
 @ActiveProfiles({"test", "dev"})
 @AutoConfigureWireMock(port = 0)
-class PaymentServiceIT {
-
-    @Container
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
-
-    @Container
-    static MongoDBContainer mongoDB = new MongoDBContainer(DockerImageName.parse("mongo:6.0"));
+@Import(LiquibaseTestOverride.class)
+class PaymentServiceIT extends MongoTestcontainersConfig {
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -72,13 +75,29 @@ class PaymentServiceIT {
     @Autowired
     private PaymentServiceImpl paymentService;
 
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    @MockBean
+    private InboxEventConsumer inboxEventConsumer;
+
+    @MockBean
+    private InboxServiceImpl inboxService;
+
+    @MockBean
+    private InboxScheduler inboxScheduler;
+
+    @MockBean
+    private InboxMetrics inboxMetrics;
+
+    @MockBean
+    private DataSource dataSource;
+
     private EventEnvelope<OrderEventDto> eventEnvelope;
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
         registry.add("random.number.api.base-url", () -> "http://localhost:${wiremock.server.port}");
-        registry.add("spring.data.mongodb.uri", mongoDB::getReplicaSetUrl);
     }
 
     @BeforeEach
@@ -135,24 +154,24 @@ class PaymentServiceIT {
         assertThat(dto).isNotNull();
         assertThat(paymentRepository.findByOrderId(ENTITY_ID)).hasSize(1);
 
-        Map<String, Object> consumerProps = Map.of(
-                "bootstrap.servers", kafka.getBootstrapServers(),
-                "group.id", "payment-service-test-group",
-                "key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer",
-                "value.deserializer", "org.springframework.kafka.support.serializer.JsonDeserializer",
-                "auto.offset.reset", "earliest",
-                "enable.auto.commit", "true",
-                "spring.json.trusted.packages", "*"
-        );
+        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
+                "payment-service-it-group", "true", embeddedKafkaBroker);
+        consumerProps.put("spring.json.trusted.packages", "*");
+        consumerProps.put("spring.json.value.default.type", PaymentEventDto.class.getName());
+        consumerProps.put("value.deserializer",
+                "org.springframework.kafka.support.serializer.JsonDeserializer");
+        consumerProps.put("key.deserializer",
+                "org.apache.kafka.common.serialization.StringDeserializer");
+
         ConsumerFactory<String, PaymentEventDto> cf = new DefaultKafkaConsumerFactory<>(consumerProps);
         Consumer<String, PaymentEventDto> consumer = cf.createConsumer();
-        consumer.subscribe(Collections.singleton("create-payment"));
+        consumer.subscribe(Collections.singleton(CREATE_PAYMENT_TOPIC));
 
         var records = KafkaTestUtils.getRecords(consumer, Duration.ofSeconds(5));
         assertThat(records.count()).isGreaterThan(0);
 
         ConsumerRecord<String, PaymentEventDto> firstRecord = records.iterator().next();
-        assertThat(firstRecord.value().getOrderId()).isEqualTo("1");
+        assertThat(firstRecord.value().getOrderId()).isEqualTo(ENTITY_ID);
         assertThat(firstRecord.value().getPaymentAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000.00));
 
         consumer.close();
@@ -194,7 +213,7 @@ class PaymentServiceIT {
     void getPaymentsByOrderId_ShouldReturnList_WhenPaymentsExist() {
         PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
-        List<PaymentEventDto> list = paymentService.getPaymentsByOrderId("1");
+        List<PaymentEventDto> list = paymentService.getPaymentsByOrderId(ENTITY_ID);
 
         assertFalse(list.isEmpty());
         assertEquals(dto.getOrderId(), list.get(0).getOrderId());
@@ -204,7 +223,7 @@ class PaymentServiceIT {
     void getPaymentsByUserId_ShouldReturnList_WhenPaymentsExist() {
         PaymentEventDto dto = paymentService.createPayment(eventEnvelope);
 
-        List<PaymentEventDto> list = paymentService.getPaymentsByUserId("1");
+        List<PaymentEventDto> list = paymentService.getPaymentsByUserId(ENTITY_ID);
 
         assertFalse(list.isEmpty());
         assertEquals(dto.getUserId(), list.get(0).getUserId());
@@ -225,7 +244,8 @@ class PaymentServiceIT {
         paymentService.createPayment(eventEnvelope);
 
         EventEnvelope<OrderEventDto> secondEnvelope =
-                EventEnvelopeGenerator.generateOrderEventEnvelope(OrderEventDtoGenerator.generateOrderEventDto("2"));
+                EventEnvelopeGenerator.generateOrderEventEnvelope(
+                        OrderEventDtoGenerator.generateOrderEventDto("2"));
         paymentService.createPayment(secondEnvelope);
 
         LocalDateTime start = LocalDateTime.now().minusDays(1);

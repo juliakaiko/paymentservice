@@ -16,6 +16,9 @@ public class InboxEventGenerator {
     public static final String DEFAULT_PAYLOAD =
             "{\"orderId\":\"1\",\"userId\":\"1\",\"paymentAmount\":1000.00}";
 
+    /** Валидный JSON (массив), не десериализуется в OrderEventDto. */
+    public static final String UNDESERIALIZABLE_PAYLOAD = "[]";
+
     public static InboxEvent generateReceivedInboxEvent() {
         return generateInboxEvent(InboxEventStatus.RECEIVED, 0, DEFAULT_PAYLOAD);
     }

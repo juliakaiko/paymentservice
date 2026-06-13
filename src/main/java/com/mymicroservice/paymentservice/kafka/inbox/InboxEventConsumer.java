@@ -21,10 +21,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.mymicroservice.paymentservice.util.KafkaHeadersConstants.EVENT_TYPE;
-import static com.mymicroservice.paymentservice.util.KafkaHeadersConstants.IDEMPOTENCE_ID;
-import static com.mymicroservice.paymentservice.util.KafkaHeadersConstants.SOURCE_SERVICE;
-import static com.mymicroservice.paymentservice.util.KafkaHeadersConstants.TRACE_ID;
+import static com.mymicroservice.paymentservice.util.CommonConstants.EVENT_TYPE;
+import static com.mymicroservice.paymentservice.util.CommonConstants.IDEMPOTENCE_ID;
+import static com.mymicroservice.paymentservice.util.CommonConstants.SOURCE_SERVICE;
+import static com.mymicroservice.paymentservice.util.CommonConstants.TRACE_ID;
 
 @Service
 @RequiredArgsConstructor
