@@ -81,11 +81,16 @@ jobs:
           unzip -q -j target/*.jar 'BOOT-INF/lib/*.jar' -d target/unpacked-libs || echo "No libraries found in JAR"
 
       # 9. Static code analysis with SonarCloud
+      - name: Check JaCoCo
+        run: |
+          ls -R target/site/jacoco
+          cat target/site/jacoco/jacoco.xml | head -20
+
       - name: SonarCloud Scan
         run: |
           mvn -B clean verify sonar:sonar \
-            -Dsonar.projectKey=juliakaiko_userservice \
-            -Dsonar.projectName=UserService \
+            -Dsonar.projectKey=juliakaiko_paymentservice \
+            -Dsonar.projectName=paymentservice \
             -Dsonar.organization=juliakaiko \
             -Dsonar.sources=src/main/java \
             -Dsonar.tests=src/test/java \
