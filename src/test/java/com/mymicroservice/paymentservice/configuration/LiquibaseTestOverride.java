@@ -12,7 +12,7 @@ public class LiquibaseTestOverride {
 
     @Bean
     @Primary
-    SpringLiquibase postgresLiquibase() {
+    SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setShouldRun(false);
         return liquibase;

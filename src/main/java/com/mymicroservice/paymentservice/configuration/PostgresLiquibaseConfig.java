@@ -17,9 +17,8 @@ public class PostgresLiquibaseConfig {
     @Value("${liquibase.postgres.changelog}")
     private String postgresChangelogPath;
 
-
     @Bean
-    public SpringLiquibase postgresLiquibase(DataSource dataSource) {
+    public SpringLiquibase liquibase(DataSource dataSource) {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(postgresChangelogPath);
