@@ -16,7 +16,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,24 +29,12 @@ import java.util.List;
 @RestController
 @RequestMapping("api/payments")
 @RequiredArgsConstructor
-@Tag(name="UserController")
+@Tag(name="PaymentController")
 @Slf4j
 @Validated
 public class PaymentController {
 
     private final PaymentService paymentService;
-
-    @PostMapping("/")
-    public ResponseEntity<PaymentEventDto> createPayment(@Valid @RequestBody PaymentRequestDto paymentRequestDto) {
-        log.info("Request to add a new Payment record: {}", paymentRequestDto);
-        OrderEventDto orderEventDto = PaymentRequestMapper.INSTANCE.toOrderEventDto(paymentRequestDto);
-
-        PaymentEventDto savedPayment = paymentService.createPayment(orderEventDto);
-
-        return ObjectUtils.isEmpty(savedPayment)
-                ? ResponseEntity.notFound().build()
-                : ResponseEntity.ok(savedPayment);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPaymentById (@PathVariable("id") String id) {

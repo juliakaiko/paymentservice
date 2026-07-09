@@ -2,9 +2,6 @@ name: CI Pipeline for Spring Boot JAR (PaymentService)
 
 on:
   push:
-    branches:
-      - branch1
-      - main
 
 jobs:
   build-and-deploy:
@@ -45,15 +42,20 @@ jobs:
       - name: Set up Maven settings.xml for GitHub Packages
         run: |
           mkdir -p ~/.m2
-          echo "<settings>
+          echo '<settings>
             <servers>
               <server>
-                <id>github</id>
+                <id>github-event</id>
+                <username>${GITHUB_ACTOR}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+              <server>
+                <id>github-filter</id>
                 <username>${GITHUB_ACTOR}</username>
                 <password>${{ secrets.GITHUB_TOKEN }}</password>
               </server>
             </servers>
-          </settings>" > ~/.m2/settings.xml
+          </settings>' > ~/.m2/settings.xml
 
       # 6. Build and test with Maven (Testcontainers)
       - name: Build and test with Maven
@@ -79,18 +81,26 @@ jobs:
           unzip -q -j target/*.jar 'BOOT-INF/lib/*.jar' -d target/unpacked-libs || echo "No libraries found in JAR"
 
       # 9. Static code analysis with SonarCloud
+      - name: Check JaCoCo
+        run: |
+          ls -R target/site/jacoco
+          cat target/site/jacoco/jacoco.xml | head -20
+
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        run: |
+          mvn -B clean verify sonar:sonar \
+            -Dsonar.projectKey=juliakaiko_paymentservice \
+            -Dsonar.projectName=paymentservice \
+            -Dsonar.organization=juliakaiko \
+            -Dsonar.sources=src/main/java \
+            -Dsonar.tests=src/test/java \
+            -Dsonar.java.binaries=target/classes,target/generated-sources/annotations \
+            -Dsonar.java.test.binaries=target/test-classes \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.sourceEncoding=UTF-8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-        with:
-          args: >
-            -Dsonar.projectKey=juliakaiko_paymentservice
-            -Dsonar.projectName=paymentservice
-            -Dsonar.organization=juliakaiko
-            -Dsonar.java.binaries=target/classes
-            -Dsonar.java.libraries=target/unpacked-libs/*.jar
 
       # 10. Login to Docker Hub
       - name: Login to Docker Hub
@@ -103,5 +113,8 @@ jobs:
       - name: Build and Push Docker Image
         if: success()
         run: |
-          docker build -t juliakaiko94/paymentservice:latest .
+          docker build \
+            --build-arg GITHUB_USERNAME=${{ github.actor }} \
+            --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -t juliakaiko94/paymentservice:latest .
           docker push juliakaiko94/paymentservice:latest

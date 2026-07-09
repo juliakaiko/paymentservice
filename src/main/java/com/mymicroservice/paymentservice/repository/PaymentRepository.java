@@ -1,18 +1,21 @@
 package com.mymicroservice.paymentservice.repository;
 
-import com.mymicroservice.paymentservice.model.PaymentEntity;
+import com.mymicroservice.paymentservice.model.Payment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface PaymentRepository extends MongoRepository<PaymentEntity, String> {
+public interface PaymentRepository extends MongoRepository<Payment, String> {
 
-    List<PaymentEntity> findByOrderId(String orderId);
+    Optional<Payment> findFirstByOrderId(String orderId);
 
-    List<PaymentEntity> findByUserId(String userId);
+    List<Payment> findByOrderId(String orderId);
 
-    List<PaymentEntity> findByStatusIn(List<String> statuses);
+    List<Payment> findByUserId(String userId);
 
-    List<PaymentEntity> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
+    List<Payment> findByStatusIn(List<String> statuses);
+
+    List<Payment> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
 }
