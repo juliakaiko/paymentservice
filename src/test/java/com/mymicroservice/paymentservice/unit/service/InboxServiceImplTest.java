@@ -184,4 +184,22 @@ class InboxServiceImplTest {
         assertEquals(InboxEventStatus.DEAD.name(), statusCaptor.getValue());
         verify(deadLetterAlert, atLeastOnce()).alert(any(), any(), any());
     }
+
+    @Test
+    void saveUnprocessableEvent_ShouldIgnoreDuplicate_WhenEventAlreadyExists() {
+        UUID idempotenceId = UUID.randomUUID();
+        when(inboxRepository.insertIgnoreDuplicate(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), anyInt()
+        )).thenReturn(0);
+
+        inboxService.saveUnprocessableEvent(
+                idempotenceId,
+                "CREATE_ORDER",
+                "trace-id",
+                "orderservice",
+                "Failed to serialize OrderEventDto to JSON"
+        );
+
+        verify(deadLetterAlert, never()).alert(any(), any(), any());
+    }
 }
