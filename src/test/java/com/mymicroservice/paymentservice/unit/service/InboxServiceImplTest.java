@@ -184,4 +184,36 @@ class InboxServiceImplTest {
         assertEquals(InboxEventStatus.DEAD.name(), statusCaptor.getValue());
         verify(deadLetterAlert, atLeastOnce()).alert(any(), any(), any());
     }
+
+    @Test
+    void saveUnprocessableEvent_ShouldIgnoreDuplicate_WhenEventAlreadyExists() {
+        UUID idempotenceId = UUID.randomUUID();
+        when(inboxRepository.insertIgnoreDuplicate(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), anyInt()
+        )).thenReturn(0);
+
+        inboxService.saveUnprocessableEvent(
+                idempotenceId,
+                "CREATE_ORDER",
+                "trace-id",
+                "orderservice",
+                "Failed to serialize OrderEventDto to JSON"
+        );
+
+        verify(deadLetterAlert, never()).alert(any(), any(), any());
+    }
+
+    @Test
+    void processPendingInboxEvents_ShouldHandleDeadUpdateFailure_WhenMaxRetriesExceededAndUpdateFails() {
+        InboxEvent event = InboxEventGenerator.generateFailedInboxEvent(9);
+
+        when(inboxRepository.findEventsForProcessing(any(), anyInt())).thenReturn(List.of(event));
+        when(jsonMapper.fromJson(event.getPayload(), OrderEventDto.class))
+                .thenThrow(new IllegalStateException("processing error"));
+        when(inboxRepository.updateStatusAndRetryCount(any(), any(), anyInt(), any())).thenReturn(0);
+
+        inboxService.processPendingInboxEvents();
+
+        verify(deadLetterAlert, never()).alert(any(), any(), any());
+    }
 }

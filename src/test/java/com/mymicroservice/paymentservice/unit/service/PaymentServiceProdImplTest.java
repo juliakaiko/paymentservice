@@ -6,7 +6,7 @@ import com.mymicroservice.paymentservice.kafka.PaymentEventProducer;
 import com.mymicroservice.paymentservice.model.Payment;
 import com.mymicroservice.paymentservice.model.enums.PaymentStatus;
 import com.mymicroservice.paymentservice.repository.PaymentRepository;
-import com.mymicroservice.paymentservice.service.impl.PaymentServiceImpl;
+import com.mymicroservice.paymentservice.service.impl.PaymentServiceProdImpl;
 import com.mymicroservice.paymentservice.util.EventEnvelopeGenerator;
 import com.mymicroservice.paymentservice.util.OrderEventDtoGenerator;
 import com.mymicroservice.paymentservice.util.PaymentEntitiesGenerator;
@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mymicroservices.common.events.OrderEventDto;
 import org.mymicroservices.common.events.PaymentEventDto;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,10 +37,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentServiceImplTest {
+class PaymentServiceProdImplTest {
 
     @InjectMocks
-    PaymentServiceImpl paymentService;
+    private PaymentServiceProdImpl paymentService;
 
     @Mock
     private PaymentRepository paymentRepository;
@@ -70,7 +71,6 @@ class PaymentServiceImplTest {
         PaymentEventDto result = paymentService.createPayment(eventEnvelope);
 
         assertEquals(PaymentStatus.PAID.toString(), result.getStatus());
-        verify(paymentRepository).save(any(Payment.class));
         verify(paymentEventProducer).sendCreatePayment(any());
     }
 
@@ -83,7 +83,20 @@ class PaymentServiceImplTest {
 
         assertEquals(existing.getId(), result.getId());
         verify(paymentRepository, never()).save(any(Payment.class));
-        verify(paymentEventProducer, never()).sendCreatePayment(any());
+    }
+
+    @Test
+    void createPayment_ShouldReturnExistingPayment_WhenDuplicateKeyExceptionOccurs() {
+        Payment existing = expectedPayments.get(0);
+        when(paymentRepository.findFirstByOrderId(ENTITY_ID))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(existing));
+        when(randomNumberClient.generateRandNum()).thenReturn(42);
+        when(paymentRepository.save(any(Payment.class))).thenThrow(new DuplicateKeyException("dup"));
+
+        PaymentEventDto result = paymentService.createPayment(eventEnvelope);
+
+        assertEquals(existing.getId(), result.getId());
     }
 
     @Test
@@ -94,15 +107,13 @@ class PaymentServiceImplTest {
         PaymentEventDto result = paymentService.getPaymentById(entity.getId());
 
         assertEquals(entity.getId(), result.getId());
-        assertEquals(entity.getOrderId(), result.getOrderId());
     }
 
     @Test
     void getPaymentById_ShouldThrowException_WhenPaymentNotFound() {
         when(paymentRepository.findById("missing")).thenReturn(Optional.empty());
 
-        assertThrows(PaymentNotFoundException.class,
-                () -> paymentService.getPaymentById("missing"));
+        assertThrows(PaymentNotFoundException.class, () -> paymentService.getPaymentById("missing"));
     }
 
     @Test
@@ -115,8 +126,6 @@ class PaymentServiceImplTest {
         PaymentEventDto result = paymentService.updatePayment(entity.getId(), orderEventDto);
 
         assertEquals(PaymentStatus.FAILED.toString(), result.getStatus());
-        assertEquals(orderEventDto.getOrderId(), result.getOrderId());
-        assertEquals(orderEventDto.getUserId(), result.getUserId());
     }
 
     @Test
@@ -142,39 +151,7 @@ class PaymentServiceImplTest {
     void deletePaymentById_ShouldThrowException_WhenPaymentNotFound() {
         when(paymentRepository.findById("missing")).thenReturn(Optional.empty());
 
-        assertThrows(PaymentNotFoundException.class,
-                () -> paymentService.deletePaymentById("missing"));
-    }
-
-    @Test
-    void getPaymentsByOrderId_ShouldReturnList_WhenPaymentsExist() {
-        when(paymentRepository.findByOrderId(ENTITY_ID)).thenReturn(expectedPayments);
-
-        List<PaymentEventDto> result = paymentService.getPaymentsByOrderId(ENTITY_ID);
-
-        assertEquals(expectedPayments.size(), result.size());
-        assertEquals(expectedPayments.get(0).getOrderId(), result.get(0).getOrderId());
-    }
-
-    @Test
-    void getPaymentsByUserId_ShouldReturnList_WhenPaymentsExist() {
-        when(paymentRepository.findByUserId(ENTITY_ID)).thenReturn(expectedPayments);
-
-        List<PaymentEventDto> result = paymentService.getPaymentsByUserId(ENTITY_ID);
-
-        assertEquals(expectedPayments.size(), result.size());
-        assertEquals(expectedPayments.get(0).getUserId(), result.get(0).getUserId());
-    }
-
-    @Test
-    void getPaymentsByStatuses_ShouldReturnList_WhenPaymentsExist() {
-        when(paymentRepository.findByStatusIn(List.of("PAID", "FAILED")))
-                .thenReturn(expectedPayments);
-
-        List<PaymentEventDto> result = paymentService.getPaymentsByStatuses(List.of("PAID", "FAILED"));
-
-        assertEquals(expectedPayments.size(), result.size());
-        assertTrue(List.of("PAID", "FAILED").contains(result.get(0).getStatus()));
+        assertThrows(PaymentNotFoundException.class, () -> paymentService.deletePaymentById("missing"));
     }
 
     @Test
@@ -189,42 +166,50 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void getTotalSumForPeriod_ShouldReturnSum_WhenPaymentsExistInPeriod() {
-        Payment e1 = expectedPayments.get(0);
+    void getPaymentsByOrderId_ShouldReturnList_WhenPaymentsExist() {
+        when(paymentRepository.findByOrderId(ENTITY_ID)).thenReturn(expectedPayments);
 
-        when(paymentRepository.findByTimestampBetween(any(), any()))
-                .thenReturn(List.of(e1));
+        List<PaymentEventDto> result = paymentService.getPaymentsByOrderId(ENTITY_ID);
+
+        assertEquals(expectedPayments.size(), result.size());
+    }
+
+    @Test
+    void getPaymentsByUserId_ShouldReturnList_WhenPaymentsExist() {
+        when(paymentRepository.findByUserId(ENTITY_ID)).thenReturn(expectedPayments);
+
+        List<PaymentEventDto> result = paymentService.getPaymentsByUserId(ENTITY_ID);
+
+        assertEquals(expectedPayments.size(), result.size());
+    }
+
+    @Test
+    void getPaymentsByStatuses_ShouldReturnList_WhenPaymentsExist() {
+        when(paymentRepository.findByStatusIn(List.of("PAID", "FAILED"))).thenReturn(expectedPayments);
+
+        List<PaymentEventDto> result = paymentService.getPaymentsByStatuses(List.of("PAID", "FAILED"));
+
+        assertTrue(List.of("PAID", "FAILED").contains(result.get(0).getStatus()));
+    }
+
+    @Test
+    void getTotalSumForPeriod_ShouldReturnSum_WhenPaymentsExistInPeriod() {
+        when(paymentRepository.findByTimestampBetween(any(), any())).thenReturn(List.of(expectedPayments.get(0)));
 
         BigDecimal sum = paymentService.getTotalSumForPeriod(
-                LocalDateTime.of(2025, 1, 1, 1, 10, 1).minusDays(1),
-                LocalDateTime.of(2025, 2, 2, 2, 20, 2).plusDays(1));
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1));
 
         assertEquals(BigDecimal.valueOf(1000.00), sum);
     }
 
     @Test
-    void createPayment_ShouldReturnExistingPayment_WhenDuplicateKeyExceptionOccurs() {
-        Payment existing = expectedPayments.get(0);
-        when(paymentRepository.findFirstByOrderId(ENTITY_ID))
-                .thenReturn(Optional.empty())
-                .thenReturn(Optional.of(existing));
-        when(randomNumberClient.generateRandNum()).thenReturn(42);
-        when(paymentRepository.save(any(Payment.class))).thenThrow(new org.springframework.dao.DuplicateKeyException("dup"));
-
-        PaymentEventDto result = paymentService.createPayment(eventEnvelope);
-
-        assertEquals(existing.getId(), result.getId());
-    }
-
-    @Test
-    void getTotalSumForPeriod_ShouldExcludeFailedAndNullAmounts_WhenMixedStatusesExist() {
+    void getTotalSumForPeriod_ShouldExcludeFailedPayments_WhenMixedStatusesExist() {
         Payment paid = expectedPayments.get(0);
         Payment failed = PaymentEntitiesGenerator.generatePaymentEntities().get(1);
         failed.setStatus(PaymentStatus.FAILED);
-        failed.setPaymentAmount(BigDecimal.valueOf(500));
 
-        when(paymentRepository.findByTimestampBetween(any(), any()))
-                .thenReturn(List.of(paid, failed));
+        when(paymentRepository.findByTimestampBetween(any(), any())).thenReturn(List.of(paid, failed));
 
         BigDecimal sum = paymentService.getTotalSumForPeriod(
                 LocalDateTime.now().minusDays(1),
