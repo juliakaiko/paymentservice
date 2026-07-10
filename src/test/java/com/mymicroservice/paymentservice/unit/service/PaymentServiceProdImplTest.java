@@ -129,6 +129,14 @@ class PaymentServiceProdImplTest {
     }
 
     @Test
+    void updatePayment_ShouldThrowException_WhenPaymentNotFound() {
+        when(paymentRepository.findById("missing")).thenReturn(Optional.empty());
+
+        assertThrows(PaymentNotFoundException.class,
+                () -> paymentService.updatePayment("missing", orderEventDto));
+    }
+
+    @Test
     void deletePaymentById_ShouldReturnPaymentEventDto_WhenPaymentExists() {
         Payment entity = expectedPayments.get(0);
         when(paymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(entity));
@@ -137,6 +145,24 @@ class PaymentServiceProdImplTest {
 
         assertEquals(entity.getId(), result.getId());
         verify(paymentRepository).deleteById(entity.getId());
+    }
+
+    @Test
+    void deletePaymentById_ShouldThrowException_WhenPaymentNotFound() {
+        when(paymentRepository.findById("missing")).thenReturn(Optional.empty());
+
+        assertThrows(PaymentNotFoundException.class, () -> paymentService.deletePaymentById("missing"));
+    }
+
+    @Test
+    void createPayment_ShouldSetFailedStatus_WhenRandomIsOdd() {
+        when(paymentRepository.findFirstByOrderId(ENTITY_ID)).thenReturn(Optional.empty());
+        when(randomNumberClient.generateRandNum()).thenReturn(43);
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+
+        PaymentEventDto result = paymentService.createPayment(eventEnvelope);
+
+        assertEquals(PaymentStatus.FAILED.toString(), result.getStatus());
     }
 
     @Test
@@ -169,6 +195,21 @@ class PaymentServiceProdImplTest {
     @Test
     void getTotalSumForPeriod_ShouldReturnSum_WhenPaymentsExistInPeriod() {
         when(paymentRepository.findByTimestampBetween(any(), any())).thenReturn(List.of(expectedPayments.get(0)));
+
+        BigDecimal sum = paymentService.getTotalSumForPeriod(
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1));
+
+        assertEquals(BigDecimal.valueOf(1000.00), sum);
+    }
+
+    @Test
+    void getTotalSumForPeriod_ShouldExcludeFailedPayments_WhenMixedStatusesExist() {
+        Payment paid = expectedPayments.get(0);
+        Payment failed = PaymentEntitiesGenerator.generatePaymentEntities().get(1);
+        failed.setStatus(PaymentStatus.FAILED);
+
+        when(paymentRepository.findByTimestampBetween(any(), any())).thenReturn(List.of(paid, failed));
 
         BigDecimal sum = paymentService.getTotalSumForPeriod(
                 LocalDateTime.now().minusDays(1),

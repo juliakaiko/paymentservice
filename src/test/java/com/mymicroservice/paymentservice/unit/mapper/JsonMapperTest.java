@@ -114,6 +114,37 @@ class JsonMapperTest {
         assertTrue(mapperWithMock.fromJson("{\"orderId\":\"1\"}", OrderEventDto.class).isEmpty());
     }
 
+    @Test
+    void fromJson_ShouldReturnEmpty_WhenBytesAreInvalid() {
+        assertTrue(jsonMapper.fromJson("{invalid".getBytes(), OrderEventDto.class).isEmpty());
+    }
+
+    @Test
+    void fromJson_ShouldReturnEmpty_WhenByteArrayUnexpectedExceptionOccurs() throws Exception {
+        ObjectMapper failingMapper = org.mockito.Mockito.mock(ObjectMapper.class);
+        org.mockito.Mockito.when(failingMapper.readValue(
+                org.mockito.ArgumentMatchers.any(byte[].class),
+                org.mockito.ArgumentMatchers.eq(OrderEventDto.class)))
+                .thenThrow(new RuntimeException("unexpected"));
+
+        JsonMapper mapperWithMock = new JsonMapper(failingMapper,
+                Validation.buildDefaultValidatorFactory().getValidator());
+
+        assertTrue(mapperWithMock.fromJson("{\"orderId\":\"1\"}".getBytes(), OrderEventDto.class).isEmpty());
+    }
+
+    @Test
+    void toJson_ShouldReturnEmpty_WhenUnexpectedSerializationExceptionOccurs() throws Exception {
+        ObjectMapper failingMapper = org.mockito.Mockito.mock(ObjectMapper.class);
+        org.mockito.Mockito.when(failingMapper.writeValueAsString(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new RuntimeException("unexpected"));
+
+        JsonMapper mapperWithMock = new JsonMapper(failingMapper,
+                Validation.buildDefaultValidatorFactory().getValidator());
+
+        assertTrue(mapperWithMock.toJson(OrderEventDto.builder().orderId("1").build()).isEmpty());
+    }
+
     private static class UnserializableObject {
         public UnserializableObject getSelf() {
             return this;

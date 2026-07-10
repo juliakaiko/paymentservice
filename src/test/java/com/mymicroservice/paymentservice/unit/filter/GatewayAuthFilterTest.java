@@ -92,6 +92,29 @@ class GatewayAuthFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
+    @Test
+    void doFilterInternal_ShouldClearSecurityContext_WhenJwtPayloadIsMalformed() throws Exception {
+        request.addHeader(INTERNAL_CALL_HEADER, "true");
+        request.addHeader(SOURCE_SERVICE_HEADER, GATEWAY_SERVICE_NAME);
+        request.addHeader("Authorization", "Bearer header.not-json-payload.signature");
+
+        gatewayAuthFilter.doFilter(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_ShouldClearSecurityContext_WhenGatewaySourceIsInvalid() throws Exception {
+        request.addHeader(INTERNAL_CALL_HEADER, "true");
+        request.addHeader(SOURCE_SERVICE_HEADER, "unknown-service");
+
+        gatewayAuthFilter.doFilter(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+    }
+
     private String buildJwt(String userId, List<String> roles) {
         String payloadJson = "{\"sub\":\"" + userId + "\",\"roles\":[\"" + String.join("\",\"", roles) + "\"]}";
         return encodeJwt(payloadJson);

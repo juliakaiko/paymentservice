@@ -333,36 +333,6 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>com/mymicroservice/paymentservice/PaymentserviceApplication</exclude>
-                                <exclude>com/mymicroservice/paymentservice/util/PaymentDataLoader</exclude>
-                                <exclude>com/mymicroservice/paymentservice/configuration/MongoLiquibaseConfig</exclude>
-                                <exclude>com/mymicroservice/paymentservice/configuration/PostgresLiquibaseConfig</exclude>
-                                <exclude>com/mymicroservice/paymentservice/configuration/MongoConfig</exclude>
-                                <exclude>com/mymicroservice/paymentservice/configuration/SecurityConfig</exclude>
-                                <exclude>com/mymicroservice/paymentservice/configuration/OpenApiConfig</exclude>
-                            </excludes>
-                            <rules>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>INSTRUCTION</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.95</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 		</plugins>

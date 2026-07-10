@@ -54,6 +54,19 @@ class ErrorItemTest {
         assertEquals(16, formatted.length());
     }
 
+    @Test
+    void fromMethodArgumentNotValid_ShouldMergeDuplicateFieldErrors_WhenSameFieldHasMultipleErrors() {
+        setRequestContext("/api/payments");
+        BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "dto");
+        bindingResult.addError(new FieldError("dto", "orderId", "first"));
+        bindingResult.addError(new FieldError("dto", "orderId", "second"));
+        MethodArgumentNotValidException exception = new MethodArgumentNotValidException(null, bindingResult);
+
+        ErrorItem error = ErrorItem.fromMethodArgumentNotValid(exception, HttpStatus.BAD_REQUEST);
+
+        assertEquals("first; second", error.getFieldErrors().get("orderId"));
+    }
+
     private void setRequestContext(String uri) {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));

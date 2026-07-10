@@ -178,6 +178,17 @@ class PaymentServiceImplTest {
     }
 
     @Test
+    void createPayment_ShouldSetFailedStatus_WhenRandomIsOdd() {
+        when(paymentRepository.findFirstByOrderId(ENTITY_ID)).thenReturn(Optional.empty());
+        when(randomNumberClient.generateRandNum()).thenReturn(43);
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+
+        PaymentEventDto result = paymentService.createPayment(eventEnvelope);
+
+        assertEquals(PaymentStatus.FAILED.toString(), result.getStatus());
+    }
+
+    @Test
     void getTotalSumForPeriod_ShouldReturnSum_WhenPaymentsExistInPeriod() {
         Payment e1 = expectedPayments.get(0);
 
